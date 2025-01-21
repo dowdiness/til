@@ -76,6 +76,8 @@ const lib = {
   div: (a: number, b: number) => a / b,
 }
 
+export const functionNames = Object.keys(lib)
+
 const registers = Object.fromEntries(
   Object
     .keys(lib)
@@ -140,13 +142,11 @@ export const interpreter = {
     const code = unit.lines.join("\n");
     const fn = new Function("lib", code);
     const res = fn(lib) as number
-    // console.log(code, res)
     return [code, res] as const
   },
   step: (input: string) => {
     const res = generator?.next();
     const current = res?.value;
-    // console.log(current)
     if (current) {
       visited.push(current);
       const args = current.ins.map(interpreter.getRef);
@@ -163,8 +163,3 @@ export const interpreter = {
     }
   }
 }
-
-// interpreterFactory({ value: })
-// interpreter.update(process!, output!)
-// const updateCode = () => interpreter.update(process!, output!)
-// exec?.addEventListener('click', updateCode)

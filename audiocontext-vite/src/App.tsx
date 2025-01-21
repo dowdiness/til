@@ -1,78 +1,44 @@
-import { proxy, useSnapshot, snapshot } from 'valtio'
-import { subscribeKey } from 'valtio/utils'
-import { Button } from './Button'
-import { interpreter } from './graph-language'
-
-const state = proxy({
-  code: 'add(3, 2).mul(2).sub(3).div(2)',
-  steps: '',
-  result: '',
-  error: '',
-  isError() {
-    return this.error.length > 0
-  }
-})
-
-// type State = typeof state
-
-const onCodechange = (code: string) => {
-  try {
-    const [steps, result] = interpreter.update(code)
-    state.steps = steps
-    state.result = `${result}`
-    state.error = ''
-  } catch (e) {
-    if (e instanceof TypeError) {
-      state.error = `TypeError: ${e.message}`
-    } else if (e instanceof SyntaxError) {
-      state.error = `SyntaxError: ${e.message}`
-    } else if (e instanceof Error) {
-      state.error = e.message
-    }
-    console.error(e)
-  }
-}
-
-const unsubscribe = subscribeKey(state, 'code', () => {
-    onCodechange(snapshot(state).code)
-  }
-)
+import { Divider } from './Divider'
+import { functionNames } from './graph-language'
+import { useLang } from './useLang'
 
 function App() {
-  const snap = useSnapshot(state)
+  const [snap, lang] = useLang()
 
   return (
-    <main className='container mx-auto my-4 flex flex-col space-y-4 items-start'>
+    <main className='container flex flex-col items-start px-4 mx-auto my-4 space-y-4'>
       <h1 className='text-3xl'>Graph Language</h1>
-        <textarea
-          id="program"
-          name="program"
-          value={snap.code}
-          className='border p-2 w-64'
-          onChange={(event) => state.code = event.target.value}
-        ></textarea>
-        <Button
-          type="button"
-          onClick={() => onCodechange(snapshot(state).code)}
-        >
-          Compile
-        </Button>
-        <code
-          className={`
-            ${state.isError()
-              ? 'text-red-600 whitespace-pre-line'
-              : 'whitespace-pre-line'
-            }`
-          }
-        >
-          {state.steps}
-        </code>
-        <p className={`${state.isError() ? 'text-red-600' : ''}`}>
-          <span>Result: {state.result} </span><span></span>
-        </p>
-        <p className='text-red-600'>
-          <span>{state.error} </span><span></span>
-        </p>
+      <Divider />
+      <h2 className='text-xl'>Functions</h2>
+      <ul className='flex space-x-2'>
+        {functionNames.map((name) => {
+          return <li key={name} className='px-2 border rounded'><span>{name}</span></li>
+        })}
+      </ul>
+      <Divider />
+      <textarea
+        id="program"
+        name="program"
+        value={snap.code}
+        className='w-full h-32 p-2 border sm:w-2/3'
+        onChange={(event) => lang.code = event.target.value}
+      ></textarea>
+      <code
+        className={`
+          ${snap.isError()
+            ? 'text-red-600 whitespace-pre-line'
+            : 'whitespace-pre-line'
+          }`
+        }
+      >
+        {snap.steps}
+      </code>
+      <p className={`${snap.isError() ? 'text-red-600' : ''}`}>
+        <span>Result: {snap.result} </span><span></span>
+      </p>
+      <p className='text-red-600'>
+        <span>{snap.error} </span><span></span>
+      </p>
     </main>
   )
 }
