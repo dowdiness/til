@@ -3,6 +3,10 @@ import { proxy, useSnapshot } from 'valtio'
 import { subscribeKey } from 'valtio/utils'
 import { interpreter } from './graph-language'
 
+export type LangProxy = typeof langProxy
+export type LangSnap = Readonly<LangProxy>
+export type OnCodeChenge = (code: string) => void
+
 const langProxy = proxy({
   code: 'add(3, 2).mul(2).sub(3).div(2)',
   steps: '',
@@ -12,9 +16,6 @@ const langProxy = proxy({
     return this.error.length > 0
   }
 })
-
-export type LangProxy = typeof langProxy
-export type LangSnap = Readonly<LangProxy>
 
 export const compile = (code: string) => {
   try {
@@ -33,8 +34,6 @@ export const compile = (code: string) => {
     }
   }
 }
-
-export type OnCodeChenge = (code: string) => void
 
 export const useLang = (
   onCodechange?: OnCodeChenge
