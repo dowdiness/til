@@ -1,13 +1,18 @@
 import { Divider } from './Divider'
 import { functionNames } from './graph-language'
 import { useLang } from './useLang'
+import { Board } from './NodeEditor/Borad'
 
 function App() {
   const [snap, lang] = useLang()
 
   return (
-    <main className='container flex flex-col items-start px-4 mx-auto my-4 space-y-4'>
+    <main className='container flex flex-col items-start my-8 space-y-4'>
       <h1 className='text-3xl'>Graph Language</h1>
+      <Divider />
+      <div className='w-full h-80'>
+        <Board></Board>
+      </div>
       <Divider />
       <h2 className='text-xl'>Functions</h2>
       <ul className='flex space-x-2'>

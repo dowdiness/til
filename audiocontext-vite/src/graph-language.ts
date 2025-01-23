@@ -1,4 +1,40 @@
 /**
+ * This code implements a simple graph-based language interpreter. Here's how it works:
+ *
+ * 1. Core Concepts:
+ * - LangNode: A class representing nodes in an expression tree. Each node has:
+ *   - type: The operation (e.g. 'add', 'mul')
+ *   - ins: Input values/nodes
+ *   - compileSelf: Function to generate code for this node
+ *
+ * 2. Key Components:
+ * - registerNode(): Creates node types and adds methods to LangNode prototype
+ * - topoSort(): Orders nodes for execution (inner expressions before outer ones)
+ * - compile(): Generates executable JavaScript code from nodes
+ * - interpreter: Handles step-by-step execution and visualization
+ *
+ * 3. Example Flow:
+ * Input: add(5, mul(sub(3,1), 2))
+ *
+ * a) Parsing creates nodes:
+ *    sub(3,1) -> mul(result,2) -> add(5,result)
+ *
+ * b) Topological sort orders execution:
+ *    sub -> mul -> add
+ *
+ * c) Code generation:
+ *    let v0 = lib.sub(3,1)
+ *    let v1 = lib.mul(v0,2)
+ *    let v2 = lib.add(5,v1)
+ *    return v2
+ *
+ * d) Execution using the lib functions
+ *
+ * The interpreter can run this either all at once or step-by-step for visualization.
+ */
+
+// Rest of code remains unchanged...
+/**
  * Retrieves the reference for a given input.
  *
  * @param {LangNode[]} nodes - The array of LangNode instances.
