@@ -33,8 +33,9 @@ export function Board() {
       if (!selectedNode) return
 
       // Update nodes position.
-      editorProxy.nodes = nodes.map((node) => {
-        return selectedNode.id === node.id ? {
+      // FIXME Maybe we should not update every element in array...
+      nodes.forEach((node, i) => {
+        nodes[i] =  selectedNode.id === node.id ? {
           ...node,
           position: {
             x: node.position.x + e.movementX,
@@ -44,8 +45,9 @@ export function Board() {
       })
 
       // Update edges position.
-      editorProxy.edges = edges.map((edge) => {
-        return selectedNode.id === edge.fromId ? {
+      // FIXME Maybe we should not update every element in array...
+      edges.forEach((edge, i) => {
+        edges[i] = selectedNode.id === edge.fromId ? {
           ...edge,
           from: {
             x: edge.from.x + e.movementX,
@@ -86,7 +88,7 @@ export function Board() {
 
   const handleConnectEnd = (edge: NewEdgeEnd) => {
     if (newEdge) {
-      editorProxy.edges = [...snap.edges, { ...newEdge, ...edge }]
+      editorProxy.edges.push({ ...newEdge, ...edge })
       setNewEdge(null)
       editorProxy.isEditingNewEdge = false
     }
@@ -124,5 +126,5 @@ export function Board() {
         />
       )}
     </div>
-  );
+  )
 }
