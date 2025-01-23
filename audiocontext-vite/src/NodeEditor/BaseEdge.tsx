@@ -40,7 +40,7 @@ export function BaseEdge({ edge, isSelected, onSelect }: BaseEdgeProps) {
     <svg className="svg">
       <path
         d={`M ${edge.from.x},${edge.from.y} L ${edge.to.x},${edge.to.y}`}
-        className={isSelected ? 'stroke-gray-800' : 'stroke-gray-400'}
+        className={isSelected ? 'stroke-zinc-800' : 'stroke-zinc-400'}
         strokeWidth="2"
         fill="none"
         onClick={handleClick}

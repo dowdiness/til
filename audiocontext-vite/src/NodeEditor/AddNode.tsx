@@ -1,5 +1,6 @@
 import { editorProxy } from './useEditor.ts'
 import type { NodeTypes } from './types.ts'
+import { Button } from "@/components/ui/button"
 
 export type AddNodeProps = {
   key: string,
@@ -11,24 +12,21 @@ export type AddNodeProps = {
 // AddNode Component
 export function AddNode({ type, args, ins }: AddNodeProps) {
   const handleClick = () => {
-    editorProxy.nodes = [
-      ...editorProxy.nodes,
-      {
-        id: `node-${crypto.randomUUID()}`,
-        type,
-        args,
-        ins,
-        position: { x: 10, y: 40 },
-      },
-    ]
+    editorProxy.nodes.push({
+      id: `node-${crypto.randomUUID()}`,
+      type,
+      args,
+      ins,
+      position: { x: 10, y: 40 },
+    })
   }
 
   return (
-    <button
-      className='px-2 border border-gray-400 rounded'
+    <Button
+      size='sm'
       onClick={handleClick}
     >
       {type}
-    </button>
+    </Button>
   )
 }
