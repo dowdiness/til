@@ -1,7 +1,7 @@
 import { Divider } from './Divider'
-import { functionNames } from './graph-language'
+import { funcs } from './graph-language'
 import { useLang } from './useLang'
-import { Board } from './NodeEditor/Borad'
+import { Board } from './NodeEditor/Board'
 
 function App() {
   const [snap, lang] = useLang()
@@ -16,8 +16,12 @@ function App() {
       <Divider />
       <h2 className='text-xl'>Functions</h2>
       <ul className='flex space-x-2'>
-        {functionNames.map((name) => {
-          return <li key={name} className='px-2 border rounded'><span>{name}</span></li>
+        {funcs.map(({ name, symbol }) => {
+          return (
+            <li key={name} className='px-2 py-1 border rounded'>
+              <span>{symbol} {name}</span>
+            </li>
+          )
         })}
       </ul>
       <Divider />

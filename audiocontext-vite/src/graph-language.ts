@@ -139,7 +139,14 @@ const registerNode = (type: string) => {
     return new LangNode(type, [this, ...args])
   }
   return (...args: any[]) => new LangNode(type, args)
-};
+}
+
+export const funcs = [
+  { name: 'add', symbol: '+', func: (a: number, b: number) => a + b },
+  { name: 'sub', symbol: '-', func: (a: number, b: number) => a - b },
+  { name: 'mul', symbol: '*', func: (a: number, b: number) => a * b },
+  { name: 'div', symbol: '/', func: (a: number, b: number) => a / b },
+]
 
 export const lib = {
   add: (a: number, b: number) => a + b,
@@ -280,7 +287,7 @@ export const interpreter = {
       const args = current.ins.map(getRef(visited))
       const line = current.compileSelf(current, getRef(visited)(current), args)
       lines.push(line)
-      timeout = setTimeout(() => interpreter.step(input), 1000)
+      timeout = window.setTimeout(() => interpreter.step(input), 1000)
     } else if (res?.done) {
       // Executed on final step
       lines.push(`return ${getRef(visited)(visited[visited.length - 1])}`)
@@ -288,7 +295,7 @@ export const interpreter = {
       const res = new Function("lib", code)(lib)
       lines.push("// result: " + res)
       const node = interpreter.createNode(input) as LangNode
-      timeout = setTimeout(() => interpreter.reset(node, input), 2000)
+      timeout = window.setTimeout(() => interpreter.reset(node, input), 2000)
     }
   }
 }
