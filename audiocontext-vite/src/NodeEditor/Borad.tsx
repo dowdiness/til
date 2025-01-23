@@ -13,8 +13,7 @@ const handleResize = (entry: ResizeObserverEntry) => {
 
 export function Board() {
   const snap = useSnapshot(editorProxy)
-  const [boardRef] = useResize(handleResize)
-  console.log(boardRef)
+  const [boardRef] = useResize<HTMLDivElement>(handleResize)
   const [selectedNodeId, setSelectedNodeId] = useState<string|null>(null)
   const [newEdge, setNewEdge] = useState<NewEdgeStart|null>(null)
 
@@ -96,7 +95,7 @@ export function Board() {
   return (
     <div
       ref={boardRef}
-      className="relative block w-full h-full border border-gray-400"
+      className="relative block w-full h-full border border-zinc-400"
       onMouseDown={handleMouseDownBoard}
       onMouseUp={handleMouseUpBoard}
       onMouseMove={handleMouseMoveBoard}

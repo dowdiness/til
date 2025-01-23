@@ -1,80 +1,36 @@
-import { useRef, useMemo, useSyncExternalStore } from 'react'
+import { useState, useCallback } from 'react'
 
 /**
- * Custom hook that provides a reference to a target HTML element and its bounding rectangle.
- * It uses the ResizeObserver API to observe changes in the size of the target element and
- * notifies subscribers when a resize occurs.
+ * Custom hook that provides a resize observer for a given DOM element.
  *
- * @param {function} [onResize] - Optional callback function that is called when the target element is resized.
- * @returns {[React.RefObject<HTMLDivElement>, DOMRectReadOnly]} - A tuple containing a reference to the target element and its bounding rectangle.
- *
+ * @template T - The type of the DOM element to observe.
+ * @param {function(ResizeObserverEntry): void} [onResize] - Optional callback function to be called when the element is resized.
+ * @returns {readonly [(node: T) => () => void, DOMRectReadOnly]} - A tuple containing a ref callback to be assigned to the element and the current DOMRectReadOnly of the element.
  * @example
- * const [targetRef, rect] = useResize((entry) => {
+ * const [refCallback, rect] = useResize<HTMLDivElement>((entry) => {
  *   console.log('Resized:', entry);
  * });
  *
- * return <div ref={targetRef}>Resize me!</div>;
+ * return <div ref={refCallback}>Resize me!</div>;
+ *
+ * @see https://react.dev/learn/manipulating-the-dom-with-refs#how-to-manage-a-list-of-refs-using-a-ref-callback
  */
-export function useResize(onResize?: (entry: ResizeObserverEntry) => void) {
-  const targetRef = useRef<HTMLDivElement>(null!)
+export function useResize<T extends Element>(
+  onResize?: (entry: ResizeObserverEntry) => void
+): readonly [(node: T) => () => void, DOMRectReadOnly] {
+  const [rect, setRect] = useState(() => new DOMRectReadOnly())
 
-  const { subscribe, getSnapshot, getServerSnapshot } = useMemo(function() {
-    let contentRect = new DOMRectReadOnly()
-    const subscribers = new Set<() => void>()
+  const refCallback = useCallback((node: T) => {
     const resizeObserver = new ResizeObserver(([entry]) => {
-      contentRect = entry.target.getBoundingClientRect()
+      setRect(node.getBoundingClientRect())
       if (onResize) onResize(entry)
-      subscribers.forEach((notifyResize) => notifyResize())
     })
+    resizeObserver.observe(node)
 
-    const subscribe = (onStoreChange: () => void) => {
-      subscribers.add(onStoreChange)
-      if (targetRef.current) {
-        resizeObserver.observe(targetRef.current)
-      }
-      return () => {
-        subscribers.delete(onStoreChange)
-        if (targetRef.current) {
-          resizeObserver.unobserve(targetRef.current)
-        }
-      }
+    return () => {
+      resizeObserver.unobserve(node)
     }
+  }, [onResize])
 
-    const getSnapshot = () => {
-      return contentRect
-    }
-
-    // Return mock object.
-    const getServerSnapshot = () => {
-      // DOMRectReadOnly is a browser-specific API and is not available in the server environment
-      // because the server does not have access to the DOM.
-      return {
-        bottom: 0,
-        height: 0,
-        left: 0,
-        right: 0,
-        top: 0,
-        width: 0,
-        x: 0,
-        y: 0,
-        toJSON() {
-          throw new Error('toJSON() is not implemented in the server environment')
-        },
-      }
-    }
-    return {
-      subscribe,
-      getSnapshot,
-      getServerSnapshot,
-    }
-  }, [])
-
-
-  const rect = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot,
-  )
-
-  return [targetRef, rect] as const
+  return [refCallback, rect] as const
 }
