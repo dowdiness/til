@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { editorProxy } from './useEditor.ts'
 import type { NodeSnap, NewEdgeStart, NewEdgeEnd } from './types.ts'
 import './baseNode.css'
@@ -13,7 +14,7 @@ type NodeElementProps = {
 let count = 1
 
 // NodeElement Component
-export function BaseNode({
+export const BaseNode = memo(function BaseNode({
   node,
   onNodeSelect,
   onConnectStart,
@@ -84,4 +85,4 @@ export function BaseNode({
       </div>
     </div>
   )
-}
+})

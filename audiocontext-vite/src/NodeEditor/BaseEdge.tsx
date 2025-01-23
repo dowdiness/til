@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, memo } from 'react'
 import { editorProxy } from './useEditor.ts'
 import type { UsableEdgeStates } from './types.ts'
 import './baseEdge.css'
@@ -10,7 +10,11 @@ type BaseEdgeProps = {
   onSelect?: (id: string) => void
 }
 
-export function BaseEdge({ edge, isSelected, onSelect }: BaseEdgeProps) {
+export const BaseEdge = memo(function BaseEdge({
+  edge,
+  isSelected,
+  onSelect
+}: BaseEdgeProps) {
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     // If you have a selected Edge, you can delete it by to type Backspace.
     if (editorProxy.selectedEdgeId === edge.id && e.key === 'Backspace') {
@@ -46,5 +50,5 @@ export function BaseEdge({ edge, isSelected, onSelect }: BaseEdgeProps) {
         onClick={handleClick}
       />
     </svg>
-  );
-}
+  )
+})
