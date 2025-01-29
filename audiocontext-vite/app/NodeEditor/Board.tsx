@@ -4,16 +4,17 @@ import { BaseNode } from './BaseNode'
 import { BaseEdge } from './BaseEdge'
 import { editorProxy } from './useEditor'
 import { useResize } from "../hooks/useResize"
-import { useSnapshot, ref } from 'valtio'
+import { useSnapshot } from 'valtio'
 import type { NewEdgeStart, NewEdgeEnd } from './types'
 
-const handleResize = (entry: ResizeObserverEntry) => {
-  editorProxy.boardRect = ref(entry.target.getBoundingClientRect())
+function handleResize<T extends Element>(element: T) {
+  const { x, y } = element.getBoundingClientRect()
+  editorProxy.boardRect = { x, y }
 }
 
 export function Board() {
   const snap = useSnapshot(editorProxy)
-  const [boardRef] = useResize<HTMLDivElement>(handleResize)
+  const [boardRef, a] = useResize<HTMLDivElement>(handleResize)
   const [selectedNodeId, setSelectedNodeId] = useState<string|null>(null)
   const [newEdge, setNewEdge] = useState<NewEdgeStart|null>(null)
 

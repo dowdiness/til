@@ -7,11 +7,11 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-    /* Resolve path './src/hooks/useResize.ts' becomes '@/hooks/useResize.ts' */
+    /* Resolve path './app/hooks/useResize.ts' becomes '@/hooks/useResize.ts' */
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./src/*"
+        "./app/*"
       ]
     },
 
@@ -29,5 +29,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["app", "tests/browser"]
 }

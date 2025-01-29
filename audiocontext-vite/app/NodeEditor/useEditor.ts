@@ -1,12 +1,12 @@
-import { proxy, ref } from 'valtio'
-import type { NodeState, EdgeState, EdgeID } from './types'
+import { proxy, snapshot, subscribe } from 'valtio'
+import type { NodeState, EdgeState, EdgeID, Position } from './types'
 
 type AppState = {
   nodes: NodeState[];
   edges: EdgeState[];
   isEditingNewEdge: boolean;
   selectedEdgeId: string;
-  boardRect: DOMRectReadOnly;
+  boardRect: Position;
   deleteEdgeById: (id: EdgeID) => void;
 }
 
@@ -34,9 +34,21 @@ export const editorProxy = proxy<AppState>({
   edges: edgesProxy,
   isEditingNewEdge: false,
   selectedEdgeId: '',
-  boardRect: ref(new DOMRectReadOnly()),
+  boardRect: { x: 0, y: 0 },
   deleteEdgeById(id) {
     this.edges = this.edges.filter(edge => edge.id !== id);
     this.selectedEdgeId = '';
   },
+})
+
+// subscribe(editorProxy, () => {
+//   console.log(snapshot(editorProxy))
+// })
+
+subscribe(nodesProxy, () => {
+  console.log('nodesProxy: ', snapshot(nodesProxy))
+})
+
+subscribe(edgesProxy, () => {
+  console.log('edgesProxy: ', snapshot(edgesProxy))
 })
