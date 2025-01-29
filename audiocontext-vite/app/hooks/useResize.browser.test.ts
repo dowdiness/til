@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { useResize } from './useResize'
 import React from 'react'
@@ -22,19 +22,21 @@ const TestComponent = ({ onResize, initialSize = { width: '100px', height: '100p
 }
 
 describe('useResize', () => {
-  it('should call onResize when the element is mounted', async () => {
-    const resizeHandler = vi.fn()
-    render(React.createElement(TestComponent, { onResize: resizeHandler }))
+  let resizeHandler: Mock
+  let screen: ReturnType<typeof render>
 
+  beforeEach(() => {
+    resizeHandler = vi.fn()
+    screen = render(React.createElement(TestComponent, { onResize: resizeHandler }))
+  })
+
+  it('should call onResize when the element is mounted', async () => {
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
   })
 
   it('should call onResize when the element is resized', async () => {
-    const resizeHandler = vi.fn()
-    const { container } = render(React.createElement(TestComponent, { onResize: resizeHandler }))
-
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
@@ -42,7 +44,7 @@ describe('useResize', () => {
     // Add a style tag to resize the element
     const style = document.createElement('style')
     style.textContent = '.resize-test { width: 200px !important; }'
-    container.appendChild(style)
+    screen.container.appendChild(style)
 
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(2)
@@ -50,9 +52,6 @@ describe('useResize', () => {
   })
 
   it('should handle multiple resize events', async () => {
-    const resizeHandler = vi.fn()
-    const { container } = render(React.createElement(TestComponent, { onResize: resizeHandler }))
-
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
@@ -62,7 +61,7 @@ describe('useResize', () => {
     style.textContent = `
       .resize-test { width: 200px !important; }
     `
-    container.appendChild(style)
+    screen.container.appendChild(style)
 
     const style2 = document.createElement('style')
     style2.textContent = `
@@ -70,7 +69,7 @@ describe('useResize', () => {
         .resize-test { width: 300px !important; }
       }
     `
-    container.appendChild(style2)
+    screen.container.appendChild(style2)
 
     await vi.waitFor(() => {
       expect(resizeHandler.mock.calls.length).toBeGreaterThanOrEqual(2)
@@ -78,8 +77,6 @@ describe('useResize', () => {
   })
 
   it('should handle height changes', async () => {
-    const resizeHandler = vi.fn()
-    const { container } = render(React.createElement(TestComponent, { onResize: resizeHandler }))
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
@@ -87,7 +84,7 @@ describe('useResize', () => {
     // Change height
     const style = document.createElement('style')
     style.textContent = '.resize-test { height: 200px !important; }'
-    container.appendChild(style)
+    screen.container.appendChild(style)
 
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(2)
@@ -139,9 +136,6 @@ describe('useResize', () => {
   })
 
   it('should handle visibility changes', async () => {
-    const resizeHandler = vi.fn()
-    const screen = render(React.createElement(TestComponent, { onResize: resizeHandler }))
-
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
@@ -163,20 +157,17 @@ describe('useResize', () => {
   })
 
   it('should cleanup observer when component unmounts', async () => {
-    const resizeHandler = vi.fn()
-    const { unmount, container } = render(React.createElement(TestComponent, { onResize: resizeHandler }))
-
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
 
     // Unmount the component
-    unmount()
+    screen.unmount()
 
     // Add a style that would trigger resize if observer wasn't cleaned up
     const style = document.createElement('style')
     style.textContent = '.resize-test { width: 200px !important; }'
-    container.appendChild(style)
+    screen.container.appendChild(style)
 
     await vi.waitFor(() => {
       // Should still only have the initial call
