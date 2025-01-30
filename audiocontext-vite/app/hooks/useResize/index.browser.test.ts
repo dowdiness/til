@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { useResize } from './useResize'
+import { useResize } from '.'
 import React from 'react'
 
 const TestComponent = ({ onResize, initialSize = { width: '100px', height: '100px' } }: {
