@@ -1,27 +1,29 @@
 /// <reference types="vitest/config" />
 
-import path from 'path'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import tsconfigPaths from "vite-tsconfig-paths"
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      /* Resolve path './app/hooks/useResize.ts' becomes '@/hooks/useResize.ts' */
-      "@": path.resolve(__dirname, "./app"),
-    },
-  },
+  plugins: [tsconfigPaths(), react()],
   // vitest configs
   test: {
+    css: true,
+    reporters: ['default', 'html'],
     workspace: [{
+      optimizeDeps: {
+        include: ["react/jsx-dev-runtime"],
+      },
       test: {
         name: 'browser',
+        setupFiles: ["./tests/setup.browser.tsx"],
         include: [
-          '**/*.browser.test.{ts,tsx}',
-          'tests/browser/**/*.{test,spec}.ts'
+          '!./**/*.server.test.{ts,tsx}',
+          './**/*.browser.test.{ts,tsx}',
+          './**/*.test.{ts,tsx}'
         ],
+        // includeSource: ['**/*.{js,ts}'],
         browser: {
           enabled: true,
           headless: true,
@@ -35,15 +37,16 @@ export default defineConfig({
     },
     {
       test: {
-        name: 'unit',
+        name: 'server',
+        environment: "node",
         include: [
-          '**/*.unit.test.ts',
-          'tests/unit/**/*.{test,spec}.ts'
+          './**/*.server.test.{ts,tsx}',
+          '!./**/*.browser.test.{ts,tsx}',
+          './**/*.test.{ts,tsx}'
         ],
         includeSource: ['**/*.{js,ts}'],
       }
     }],
-    reporters: ['default', 'html'],
   },
   define: {
     // dead code elimination

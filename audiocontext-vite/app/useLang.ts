@@ -23,7 +23,6 @@ export const compile = (code: string) => {
     langProxy.steps = steps
     langProxy.result = `${result}`
     langProxy.error = ''
-    console.log(steps, result)
   } catch (e) {
     if (e instanceof TypeError) {
       langProxy.error = `TypeError: ${e.message}`

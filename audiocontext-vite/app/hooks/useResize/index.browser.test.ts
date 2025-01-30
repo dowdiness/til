@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
+import { describe, it, expect, vi } from "vitest"
 import { render } from 'vitest-browser-react'
 import { useResize } from '.'
 import React from 'react'
@@ -22,21 +22,19 @@ const TestComponent = ({ onResize, initialSize = { width: '100px', height: '100p
 }
 
 describe('useResize', () => {
-  let resizeHandler: Mock
-  let screen: ReturnType<typeof render>
-
-  beforeEach(() => {
-    resizeHandler = vi.fn()
-    screen = render(React.createElement(TestComponent, { onResize: resizeHandler }))
-  })
-
   it('should call onResize when the element is mounted', async () => {
+    const resizeHandler = vi.fn()
+    render(React.createElement(TestComponent, { onResize: resizeHandler }))
+
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
   })
 
   it('should call onResize when the element is resized', async () => {
+    const resizeHandler = vi.fn()
+    const screen = render(React.createElement(TestComponent, { onResize: resizeHandler }))
+
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
@@ -52,6 +50,9 @@ describe('useResize', () => {
   })
 
   it('should handle multiple resize events', async () => {
+    const resizeHandler = vi.fn()
+    const screen = render(React.createElement(TestComponent, { onResize: resizeHandler }))
+
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
@@ -77,6 +78,9 @@ describe('useResize', () => {
   })
 
   it('should handle height changes', async () => {
+    const resizeHandler = vi.fn()
+    const screen = render(React.createElement(TestComponent, { onResize: resizeHandler }))
+
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
@@ -136,6 +140,9 @@ describe('useResize', () => {
   })
 
   it('should handle visibility changes', async () => {
+    const resizeHandler = vi.fn()
+    const screen = render(React.createElement(TestComponent, { onResize: resizeHandler }))
+
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
@@ -157,6 +164,9 @@ describe('useResize', () => {
   })
 
   it('should cleanup observer when component unmounts', async () => {
+    const resizeHandler = vi.fn()
+    const screen = render(React.createElement(TestComponent, { onResize: resizeHandler }))
+
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)
     })
