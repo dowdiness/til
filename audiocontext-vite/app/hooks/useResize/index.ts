@@ -15,19 +15,20 @@ import { useCallback } from 'react'
  *
  * @see https://react.dev/learn/manipulating-the-dom-with-refs#how-to-manage-a-list-of-refs-using-a-ref-callback
  */
-export function useResize<T extends Element>(
-  onResize: (element: T) => void
-) {
-  const refCallback = useCallback((node: T) => {
-    const resizeObserver = new ResizeObserver(() => {
+export function useResize<T extends Element>(onResize: (element: T) => void) {
+  const refCallback = useCallback(
+    (node: T) => {
+      const resizeObserver = new ResizeObserver(() => {
+        onResize(node)
+      })
+      resizeObserver.observe(node)
       onResize(node)
-    })
-    resizeObserver.observe(node)
-    onResize(node)
-    return () => {
-      resizeObserver.unobserve(node)
-    }
-  }, [onResize])
+      return () => {
+        resizeObserver.unobserve(node)
+      }
+    },
+    [onResize],
+  )
 
   return [refCallback] as const
 }

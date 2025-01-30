@@ -1,9 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
-export const Button = ({
-  children,
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) => (
+export const Button = ({ children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode }) => (
   <button
     {...props}
     type="button"

@@ -1,4 +1,4 @@
-import { type FunctionNames } from '../graph-language'
+import type { FunctionNames } from '../graph-language'
 
 type DeepReadonly<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>
@@ -6,7 +6,7 @@ type DeepReadonly<T> = {
 
 export type NodeID = `node-${string}-${string}-${string}-${string}-${string}`
 export type EdgeID = `edge-${string}-${string}-${string}-${string}-${string}`
-export type Position =  { x: number, y: number }
+export type Position = { x: number; y: number }
 export type NodeTypes = FunctionNames | 'n'
 export type NodeState = {
   id: NodeID

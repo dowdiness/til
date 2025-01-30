@@ -1,11 +1,14 @@
-import { describe, it, expect, vi } from "vitest"
+import React from 'react'
+import { describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { useResize } from '.'
-import React from 'react'
 
-const TestComponent = ({ onResize, initialSize = { width: '100px', height: '100px' } }: {
-  onResize: (element: HTMLDivElement) => void,
-  initialSize?: { width: string, height: string }
+const TestComponent = ({
+  onResize,
+  initialSize = { width: '100px', height: '100px' },
+}: {
+  onResize: (element: HTMLDivElement) => void
+  initialSize?: { width: string; height: string }
 }) => {
   const [divRef] = useResize<HTMLDivElement>(onResize)
 
@@ -16,8 +19,8 @@ const TestComponent = ({ onResize, initialSize = { width: '100px', height: '100p
     style: {
       width: initialSize.width,
       height: initialSize.height,
-      backgroundColor: 'red'
-    }
+      backgroundColor: 'red',
+    },
   })
 }
 
@@ -102,7 +105,7 @@ describe('useResize', () => {
     const MultipleComponents = () => {
       return React.createElement('div', null, [
         React.createElement(TestComponent, { key: 1, onResize: resizeHandler1 }),
-        React.createElement(TestComponent, { key: 2, onResize: resizeHandler2 })
+        React.createElement(TestComponent, { key: 2, onResize: resizeHandler2 }),
       ])
     }
 
@@ -126,10 +129,12 @@ describe('useResize', () => {
 
   it('should handle zero dimensions', async () => {
     const resizeHandler = vi.fn()
-    render(React.createElement(TestComponent, {
-      onResize: resizeHandler,
-      initialSize: { width: '0px', height: '0px' }
-    }))
+    render(
+      React.createElement(TestComponent, {
+        onResize: resizeHandler,
+        initialSize: { width: '0px', height: '0px' },
+      }),
+    )
 
     await vi.waitFor(() => {
       expect(resizeHandler).toHaveBeenCalledTimes(1)

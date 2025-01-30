@@ -41,7 +41,7 @@
  * @returns {(input: number | LangNode) => string | number} - A function that returns the reference for the input.
  */
 const getRef = (nodes: LangNode[]) => (input: number | LangNode) => {
-  return typeof input !== "object" ? input : `v${nodes.indexOf(input)}`
+  return typeof input !== 'object' ? input : `v${nodes.indexOf(input)}`
 }
 
 /**
@@ -49,7 +49,7 @@ const getRef = (nodes: LangNode[]) => (input: number | LangNode) => {
  */
 export class LangNode {
   /** @member {string} */
-  type: string = 'add'
+  type = 'add'
   /** @member {Array.<number|LangNode>} */
   ins: (LangNode | number)[]
 
@@ -63,11 +63,7 @@ export class LangNode {
   constructor(
     type: string,
     ins: (LangNode | number)[],
-    compileSelf?: (
-      node: LangNode,
-      ref: string | number,
-      args: (string | number)[]
-    ) => string
+    compileSelf?: (node: LangNode, ref: string | number, args: (string | number)[]) => string,
   ) {
     this.type = type
     this.ins = ins
@@ -81,7 +77,7 @@ export class LangNode {
       // then output becomes
       //   "let v0 = lib.add(3,2)"
       this.compileSelf = (node, ref, args) => {
-        return `let ${ref} = lib.${node.type}(${args.join(",")})`
+        return `let ${ref} = lib.${node.type}(${args.join(',')})`
       }
     }
   }
@@ -123,7 +119,7 @@ export class LangNode {
    * @returns {string} - The compiled code for the node.
    */
   compileSelf(node: LangNode, ref: string | number, args: (string | number)[]) {
-    return `let ${ref} = lib.${node.type}(${args.join(",")})`
+    return `let ${ref} = lib.${node.type}(${args.join(',')})`
   }
 }
 
@@ -135,9 +131,11 @@ export class LangNode {
  */
 const registerNode = (type: string) => {
   // @ts-ignore
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   LangNode.prototype[type] = function (...args: any[]) {
     return new LangNode(type, [this, ...args])
   }
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   return (...args: any[]) => new LangNode(type, args)
 }
 
@@ -157,17 +155,13 @@ export const lib = {
 
 export type FunctionNames = keyof typeof lib
 
-const getKeys = <T extends {[key: string]: unknown}>(obj: T): (keyof T)[] => {
+const getKeys = <T extends { [key: string]: unknown }>(obj: T): (keyof T)[] => {
   return Object.keys(obj)
 }
 
 export const functionNames = getKeys(lib) satisfies FunctionNames[]
 
-const registers = Object.fromEntries(
-  Object
-    .keys(lib)
-    .map((name) => [name, registerNode(`${name}`)])
-)
+const registers = Object.fromEntries(Object.keys(lib).map((name) => [name, registerNode(`${name}`)]))
 
 /**
  * Topologically sorts the nodes in the graph.
@@ -186,15 +180,12 @@ const registers = Object.fromEntries(
  * @param {Set.<LangNode>} [visited=new Set()] - The set of visited nodes.
  * @yields {LangNode} - The next node in the sorted order.
  */
-function* topoSort(
-  node: LangNode | number,
-  visited = new Set<LangNode>()
-): Generator<LangNode, undefined> {
+function* topoSort(node: LangNode | number, visited = new Set<LangNode>()): Generator<LangNode, undefined> {
   if (!(node instanceof LangNode) || visited.has(node)) {
     return // constant values or already visited nodes
   }
   visited.add(node)
-  for (let input of node.ins) {
+  for (const input of node.ins) {
     yield* topoSort(input, visited)
   }
   yield node
@@ -211,15 +202,15 @@ function* topoSort(
 const run = (
   code: string,
   registers: {
-    [k: string]: (...args: number[]) => LangNode;
-  }
+    [k: string]: (...args: number[]) => LangNode
+  },
 ) => {
   const keys = Object.keys(registers)
   const values = Object.values(registers)
   return new Function(...keys, code)(...values)
 }
 
-let timeout: number | undefined;
+let timeout: number | undefined
 let generator: Generator<LangNode, undefined> | undefined
 let visited: LangNode[] = []
 let lines: string[] = []
@@ -263,10 +254,10 @@ export const interpreter = {
     // Genarate code that passed to new Function
     const unit = rootNode.compile()
     unit.lines.push(`return ${unit.last}`)
-    const code = unit.lines.join("\n")
+    const code = unit.lines.join('\n')
     // Apply lib functions to generated code, you can use any functions in lib object like this.
     // `lib.add(1, 3)`
-    const fn = new Function("lib", code)
+    const fn = new Function('lib', code)
     const res = fn(lib) as number
     //
     return [code, res] as const
@@ -291,11 +282,11 @@ export const interpreter = {
     } else if (res?.done) {
       // Executed on final step
       lines.push(`return ${getRef(visited)(visited[visited.length - 1])}`)
-      const code = lines.join("\n")
-      const res = new Function("lib", code)(lib)
-      lines.push("// result: " + res)
+      const code = lines.join('\n')
+      const res = new Function('lib', code)(lib)
+      lines.push(`// result: ${res}`)
       const node = interpreter.createNode(input) as LangNode
       timeout = window.setTimeout(() => interpreter.reset(node, input), 2000)
     }
-  }
+  },
 }

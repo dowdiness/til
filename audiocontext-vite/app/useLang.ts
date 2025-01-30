@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { proxy, useSnapshot } from 'valtio'
 import { subscribeKey } from 'valtio/utils'
 import { interpreter } from './graph-language'
@@ -14,7 +14,7 @@ const langProxy = proxy({
   error: '',
   isError() {
     return this.error.length > 0
-  }
+  },
 })
 
 export const compile = (code: string) => {
@@ -34,22 +34,23 @@ export const compile = (code: string) => {
   }
 }
 
-export const useLang = (
-  onCodechange?: OnCodeChenge
-): [LangSnap, LangProxy] => {
-  const langSnap =  useSnapshot(langProxy, { sync: true })
-  const handleCodeChange = (code: string) => {
-    compile(code)
-    if (onCodechange) {
-      onCodechange(code)
-    }
-  }
+export const useLang = (onCodechange?: OnCodeChenge): [LangSnap, LangProxy] => {
+  const langSnap = useSnapshot(langProxy, { sync: true })
+  const handleCodeChange = useCallback(
+    (code: string) => {
+      compile(code)
+      if (onCodechange) {
+        onCodechange(code)
+      }
+    },
+    [onCodechange],
+  )
 
   useEffect(() => {
     const unsubscribe = subscribeKey(langProxy, 'code', handleCodeChange)
     handleCodeChange(langSnap.code)
     return unsubscribe
-  }, [])
+  }, [langSnap.code, handleCodeChange])
 
   return [langSnap, langProxy]
 }

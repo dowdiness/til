@@ -1,12 +1,12 @@
-import { editorProxy } from './useEditor.ts'
+import { Button } from '@/components/ui/button'
 import type { NodeTypes } from './types.ts'
-import { Button } from "@/components/ui/button"
+import { editorProxy } from './useEditor.ts'
 
 export type AddNodeProps = {
-  key: string,
-  type: NodeTypes;
-  args: (number | null)[];
-  ins: (number | null)[];
+  key: string
+  type: NodeTypes
+  args: (number | null)[]
+  ins: (number | null)[]
 }
 
 // AddNode Component
@@ -22,10 +22,7 @@ export function AddNode({ type, args, ins }: AddNodeProps) {
   }
 
   return (
-    <Button
-      size='sm'
-      onClick={handleClick}
-    >
+    <Button size="sm" onClick={handleClick}>
       {type}
     </Button>
   )

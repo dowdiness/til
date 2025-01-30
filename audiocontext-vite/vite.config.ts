@@ -19,11 +19,7 @@ export default defineConfig({
         test: {
           name: 'browser',
           setupFiles: ['./tests/setup.browser.tsx'],
-          include: [
-            '!./**/*.server.test.{ts,tsx}',
-            './**/*.browser.test.{ts,tsx}',
-            './**/*.test.{ts,tsx}',
-          ],
+          include: ['!./**/*.server.test.{ts,tsx}', './**/*.browser.test.{ts,tsx}', './**/*.test.{ts,tsx}'],
           // includeSource: ['**/*.{js,ts}'],
           browser: {
             enabled: true,
@@ -38,11 +34,7 @@ export default defineConfig({
         test: {
           name: 'server',
           environment: 'node',
-          include: [
-            './**/*.server.test.{ts,tsx}',
-            '!./**/*.browser.test.{ts,tsx}',
-            './**/*.test.{ts,tsx}',
-          ],
+          include: ['./**/*.server.test.{ts,tsx}', '!./**/*.browser.test.{ts,tsx}', './**/*.test.{ts,tsx}'],
           includeSource: ['**/*.{js,ts}'],
         },
       },
