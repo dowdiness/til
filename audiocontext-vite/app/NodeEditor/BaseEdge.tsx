@@ -40,7 +40,7 @@ export const BaseEdge = memo(function BaseEdge({ edge, isSelected, onSelect }: B
   }, [isSelected, handleKeyDown])
 
   return (
-    <svg className="svg" width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <svg className="svg" width="100%" height="100%" preserveAspectRatio="none" aria-hidden="true">
       {/* TODO */}
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
       <path

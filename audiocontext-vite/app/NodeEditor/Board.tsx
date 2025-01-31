@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useSnapshot } from 'valtio'
 import { BaseEdge } from './BaseEdge'
 import { BaseNode } from './BaseNode'
+import { NumberNode } from './NumberNode'
 import { Panel } from './Panel'
 import type { NewEdgeEnd, NewEdgeStart } from './types'
 import { editorProxy } from './useEditor'
@@ -115,15 +116,31 @@ export function Board() {
       {snap.edges.map((edge) => (
         <BaseEdge key={edge.id} edge={edge} isSelected={edge.id === snap.selectedEdgeId} />
       ))}
-      {snap.nodes.map((node) => (
-        <BaseNode
-          key={node.id}
-          node={node}
-          onNodeSelect={handleNodeSelect}
-          onConnectStart={handleConnectStart}
-          onConnectEnd={handleConnectEnd}
-        />
-      ))}
+      {snap.nodes.map((node) => {
+        switch (node.type) {
+          case 'n':
+            return (
+              <NumberNode
+                key={node.id}
+                node={node}
+                onNodeSelect={handleNodeSelect}
+                onConnectStart={handleConnectStart}
+                onConnectEnd={handleConnectEnd}
+              />
+            )
+          default:
+            return (
+              <BaseNode
+                key={node.id}
+                node={node}
+                isSelected={node.id === selectedNodeId}
+                onNodeSelect={handleNodeSelect}
+                onConnectStart={handleConnectStart}
+                onConnectEnd={handleConnectEnd}
+              />
+            )
+        }
+      })}
       {newEdge && <BaseEdge edge={newEdge} isSelected={false} />}
     </div>
   )
