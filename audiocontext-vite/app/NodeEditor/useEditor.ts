@@ -1,14 +1,6 @@
-import { proxy, snapshot, subscribe } from 'valtio'
+import { proxy, snapshot } from 'valtio'
+import { watch } from 'valtio/utils'
 import type { EdgeID, EdgeState, NodeState, Position } from './types'
-
-type AppState = {
-  nodes: NodeState[]
-  edges: EdgeState[]
-  isEditingNewEdge: boolean
-  selectedEdgeId: string
-  boardRect: Position
-  deleteEdgeById: (id: EdgeID) => void
-}
 
 export const nodesProxy = proxy<NodeState[]>([
   {
@@ -29,6 +21,17 @@ export const nodesProxy = proxy<NodeState[]>([
 
 export const edgesProxy = proxy<EdgeState[]>([])
 
+type AppState = {
+  nodes: NodeState[]
+  edges: EdgeState[]
+  isEditingNewEdge: boolean
+  selectedEdgeId: string
+  boardRect: Position
+  deleteEdgeById: (id: EdgeID) => void
+  getNodeById: (id: string) => NodeState | undefined
+  updateNodeArgs: (id: string, args: (number | null)[]) => void
+}
+
 export const editorProxy = proxy<AppState>({
   nodes: nodesProxy,
   edges: edgesProxy,
@@ -39,16 +42,30 @@ export const editorProxy = proxy<AppState>({
     this.edges = this.edges.filter((edge) => edge.id !== id)
     this.selectedEdgeId = ''
   },
+  getNodeById(id: string) {
+    return this.nodes.find((node) => node.id === id)
+  },
+  updateNodeArgs(id: string, args: (number | null)[]) {
+    const node = this.getNodeById(id)
+    if (node) {
+      node.args = args
+    }
+  },
 })
 
 // subscribe(editorProxy, () => {
 //   console.log(snapshot(editorProxy))
 // })
 
-subscribe(nodesProxy, () => {
-  console.log('nodesProxy: ', snapshot(nodesProxy))
-})
+// subscribe(nodesProxy, () => {
+//   console.log('nodesProxy: ', snapshot(nodesProxy))
+// })
 
-subscribe(edgesProxy, () => {
-  console.log('edgesProxy: ', snapshot(edgesProxy))
+// subscribe(edgesProxy, () => {
+//   console.log('edgesProxy: ', snapshot(edgesProxy))
+// })
+watch((get) => {
+  const nodes = snapshot(get(nodesProxy))
+  const edges = snapshot(get(edgesProxy))
+  console.log(nodes, edges)
 })
