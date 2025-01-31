@@ -4,31 +4,31 @@ const nodeTypes = [
   {
     key: crypto.randomUUID(),
     type: 'n',
-    args: [1],
+    args: [20],
     ins: [],
   },
   {
     key: crypto.randomUUID(),
     type: 'add',
-    args: [1, 2],
+    args: [null, null],
     ins: [null, null],
   },
   {
     key: crypto.randomUUID(),
     type: 'sub',
-    args: [2, 1],
+    args: [null, null],
     ins: [null, null],
   },
   {
     key: crypto.randomUUID(),
     type: 'mul',
-    args: [2, 3],
+    args: [null, null],
     ins: [null, null],
   },
   {
     key: crypto.randomUUID(),
     type: 'div',
-    args: [4, 2],
+    args: [null, null],
     ins: [null, null],
   },
 ] satisfies AddNodeProps[]

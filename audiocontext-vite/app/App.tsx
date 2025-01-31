@@ -1,4 +1,4 @@
-import { Divider } from './Divider'
+import { Divider } from '@/components/ui/Divider'
 import { Board } from './NodeEditor/Board'
 import { funcs } from './graph-language'
 import { useLang } from './useLang'
