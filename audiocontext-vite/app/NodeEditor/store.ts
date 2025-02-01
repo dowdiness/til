@@ -1,6 +1,6 @@
 import { proxy, snapshot } from 'valtio'
 import { watch } from 'valtio/utils'
-import type { EdgeID, EdgeState, NodeState, Position } from './types'
+import type { EdgeID, EdgeState, NodeID, NodeState, Position } from './types'
 
 export const nodesProxy = proxy<NodeState[]>([
   {
@@ -30,6 +30,7 @@ type AppState = {
   deleteEdgeById: (id: EdgeID) => void
   getNodeById: (id: string) => NodeState | undefined
   updateNodeArgs: (id: string, args: (number | null)[]) => void
+  updateNodeIns: (id: string, fromId: NodeID, handlePosition: number) => void
 }
 
 export const editorProxy = proxy<AppState>({
@@ -49,6 +50,12 @@ export const editorProxy = proxy<AppState>({
     const node = this.getNodeById(id)
     if (node) {
       node.args = args
+    }
+  },
+  updateNodeIns(id: string, fromId: NodeID, handlePosition: number) {
+    const node = this.getNodeById(id)
+    if (node) {
+      node.ins[handlePosition] = fromId
     }
   },
 })

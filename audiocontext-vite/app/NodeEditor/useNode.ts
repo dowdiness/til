@@ -1,10 +1,10 @@
-import type { NewEdgeEnd, NewEdgeStart, NodeSnap } from '@/NodeEditor/types'
+import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '@/NodeEditor/types'
 import { useCallback } from 'react'
-import { editorProxy } from './useEditor'
+import { editorProxy } from './store'
 
 type UseNodeProps = {
   node: NodeSnap
-  onNodeSelect: (id: string) => void
+  onNodeSelect: (id: NodeID) => void
   onConnectStart: (edge: NewEdgeStart) => void
   onConnectEnd: (edge: NewEdgeEnd) => void
 }
@@ -18,31 +18,47 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
     [node.id, onNodeSelect],
   )
 
-  const handleConnect = useCallback(
-    (e: React.MouseEvent, placement: 'Top' | 'Bottom', index: number) => {
-      e.stopPropagation()
-      const rect = (e.target as HTMLElement).getBoundingClientRect()
-      const boardRect = editorProxy.boardRect
-      const offset = placement === 'Top' ? 0 : rect.height
-      const borderPX = 1
-      const position = {
-        x: rect.x + rect.width / 2 - boardRect.x - borderPX,
-        y: rect.y + offset - boardRect.y - borderPX,
-      }
+  const calculatePosition = useCallback((rect: DOMRect, hasOffset: boolean) => {
+    const boardRect = editorProxy.boardRect
+    const offset = hasOffset ? 0 : rect.height
+    // HACK: This is a hack to fix the border offset
+    const borderPX = 1
+    return {
+      x: rect.x + rect.width / 2 - boardRect.x - borderPX,
+      y: rect.y + offset - boardRect.y - borderPX,
+    }
+  }, [])
 
-      if (!editorProxy.isEditingNewEdge) {
-        onConnectStart({
-          id: `edge-${crypto.randomUUID()}`,
-          fromId: node.id,
-          from: position,
-          to: position,
-        })
-      } else {
-        onConnectEnd({ toId: node.id, to: position, handlePosition: index })
-      }
+  const handleConnectStart = useCallback(
+    (e: React.MouseEvent, placement: 'Top' | 'Bottom') => {
+      e.stopPropagation()
+      const position = calculatePosition(
+        (e.target as HTMLElement).getBoundingClientRect(),
+        placement === 'Top',
+      )
+
+      onConnectStart({
+        id: `edge-${crypto.randomUUID()}`,
+        fromId: node.id,
+        from: position,
+        to: position,
+      })
     },
-    [node.id, onConnectEnd, onConnectStart],
+    [node.id, onConnectStart, calculatePosition],
   )
 
-  return { handleNodeMouseDown, handleConnect }
+  const handleConnectEnd = useCallback(
+    (e: React.MouseEvent, placement: 'Top' | 'Bottom', index: number) => {
+      e.stopPropagation()
+      const position = calculatePosition(
+        (e.target as HTMLElement).getBoundingClientRect(),
+        placement === 'Top',
+      )
+      onConnectEnd({ toId: node.id, to: position, handlePosition: index })
+      editorProxy.updateNodeIns(node.id, node.id, index)
+    },
+    [node.id, onConnectEnd, calculatePosition],
+  )
+
+  return { handleNodeMouseDown, handleConnectStart, handleConnectEnd }
 }

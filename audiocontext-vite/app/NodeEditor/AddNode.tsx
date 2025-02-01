@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
+import { editorProxy } from './store.ts'
 import type { NodeTypes } from './types.ts'
-import { editorProxy } from './useEditor.ts'
 
 export type AddNodeProps = {
   key: string

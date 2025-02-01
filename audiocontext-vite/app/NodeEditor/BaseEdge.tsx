@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect } from 'react'
+import { editorProxy } from './store.ts'
 import type { UsableEdgeStates } from './types.ts'
-import { editorProxy } from './useEditor.ts'
 import './baseEdge.css'
 
 // BaseEdge Component

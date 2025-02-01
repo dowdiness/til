@@ -12,7 +12,7 @@ export type NodeState = {
   id: NodeID
   type: NodeTypes
   args: (number | null)[]
-  ins: (number | null)[]
+  ins: (NodeID | number | null)[]
   position: Position
 }
 export type NodeSnap = DeepReadonly<NodeState>

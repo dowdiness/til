@@ -1,6 +1,7 @@
 import type { NodeSnap } from '@/NodeEditor/types'
+import { useTemporalEdge } from '@/NodeEditor/useTemporalEdge'
 import { cn } from '@/lib/utils'
-import { createContext, useContext } from 'react'
+import { createContext, useCallback, useContext } from 'react'
 
 const InnerContext = createContext<NodeSnap>({
   id: `node-${crypto.randomUUID()}`,
@@ -19,7 +20,9 @@ function NodeContext({ node, children, ...rest }: NodeContextProps) {
     <InnerContext value={node}>
       <div
         className="absolute flex flex-col items-center"
-        style={{ transform: `translate(${node.position.x}px, ${node.position.y}px)` }}
+        style={{
+          transform: `translate(${node.position.x}px, ${node.position.y}px)`,
+        }}
         {...rest}
       >
         {children}
@@ -29,14 +32,28 @@ function NodeContext({ node, children, ...rest }: NodeContextProps) {
 }
 
 type NodeConnectorProps = React.ComponentProps<'div'> & {
-  onConnect: (e: React.MouseEvent, placement: 'Top' | 'Bottom', index: number) => void
+  onConnectStart: (e: React.MouseEvent) => void
+  onConnectEnd: (e: React.MouseEvent) => void
 }
 
-function NodeConnector({ onConnect, ...rest }: NodeConnectorProps) {
+function NodeConnector({ onConnectStart, onConnectEnd, ...rest }: NodeConnectorProps) {
+  const [temporalEdge] = useTemporalEdge()
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation()
+      if (temporalEdge) {
+        onConnectEnd(e)
+      } else {
+        onConnectStart(e)
+      }
+    },
+    [onConnectEnd, onConnectStart, temporalEdge],
+  )
+
   return (
     <div
       className="w-[10px] h-[10px] border rounded-md cursor-pointer border-card-foreground"
-      onMouseDown={(e) => onConnect(e, 'Bottom', 0)}
+      onMouseDown={handleMouseDown}
       {...rest}
     />
   )
@@ -59,17 +76,16 @@ type NodeMainProps = React.ComponentProps<'div'> & {
   onMouseDown: (e: React.MouseEvent) => void
 }
 function NodeMain({ className, children, onMouseDown, ...rest }: NodeMainProps) {
-  const node = useContext(InnerContext)
   return (
     <div
       className={cn(
-        'flex items-center justify-center w-32 h-12 px-8 py-4 text-base transition-colors bg-transparent border rounded-md shadow-sm cursor-pointer [&.is-dragging]:cursor-grabbing border-card-foreground active-visible:outline-none active-visible:ring-1 active-visible:ring-ring md:text-sm',
+        'flex items-center justify-center w-24 h-12 px-8 py-4 text-base transition-colors bg-transparent border rounded-md shadow-sm cursor-pointer [&.is-dragging]:cursor-grabbing border-card-foreground active-visible:outline-none active-visible:ring-1 active-visible:ring-ring md:text-sm',
         className,
       )}
       onMouseDown={onMouseDown}
       {...rest}
     >
-      {node.type}
+      {children}
     </div>
   )
 }

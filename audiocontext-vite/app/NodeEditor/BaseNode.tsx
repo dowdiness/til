@@ -1,12 +1,12 @@
 import { NodeContext } from '@/components/ui/NodeUI.tsx'
 import { memo } from 'react'
-import type { NewEdgeEnd, NewEdgeStart, NodeSnap } from './types.ts'
+import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from './types.ts'
 import { useNode } from './useNode.ts'
 
 type NodeElementProps = {
   node: NodeSnap
   isSelected: boolean
-  onNodeSelect: (id: string) => void
+  onNodeSelect: (id: NodeID) => void
   onConnectStart: (edge: NewEdgeStart) => void
   onConnectEnd: (edge: NewEdgeEnd) => void
 }
@@ -18,7 +18,7 @@ export const BaseNode = memo(function BaseNode({
   onConnectStart,
   onConnectEnd,
 }: NodeElementProps) {
-  const { handleNodeMouseDown, handleConnect } = useNode({
+  const { handleNodeMouseDown, handleConnectStart, handleConnectEnd } = useNode({
     node,
     onNodeSelect,
     onConnectStart,
@@ -31,7 +31,8 @@ export const BaseNode = memo(function BaseNode({
         connector={(i) => (
           <NodeContext.Connector
             key={`${node.id}-connector-${i}`}
-            onConnect={(e) => handleConnect(e, 'Top', i)}
+            onConnectStart={(e) => handleConnectStart(e, 'Top')}
+            onConnectEnd={(e) => handleConnectEnd(e, 'Top', i)}
           />
         )}
       />
@@ -41,7 +42,10 @@ export const BaseNode = memo(function BaseNode({
       >
         {node.type}
       </NodeContext.Node>
-      <NodeContext.Connector onConnect={(e) => handleConnect(e, 'Bottom', 0)} />
+      <NodeContext.Connector
+        onConnectStart={(e) => handleConnectStart(e, 'Bottom')}
+        onConnectEnd={(e) => handleConnectEnd(e, 'Top', 0)}
+      />
     </NodeContext>
   )
 })

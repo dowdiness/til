@@ -1,12 +1,14 @@
+import { NodeContext } from '@/components/ui/NodeUI.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { memo, useState } from 'react'
-import type { NewEdgeEnd, NewEdgeStart, NodeSnap } from './types.ts'
-import { editorProxy } from './useEditor.ts'
+import { editorProxy } from './store.ts'
+import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from './types.ts'
 import { useNode } from './useNode.ts'
 
 type NodeElementProps = {
   node: NodeSnap
-  onNodeSelect: (id: string) => void
+  isSelected: boolean
+  onNodeSelect: (id: NodeID) => void
   onConnectStart: (edge: NewEdgeStart) => void
   onConnectEnd: (edge: NewEdgeEnd) => void
 }
@@ -14,12 +16,13 @@ type NodeElementProps = {
 // NodeElement Component
 export const NumberNode = memo(function BaseNode({
   node,
+  isSelected,
   onNodeSelect,
   onConnectStart,
   onConnectEnd,
 }: NodeElementProps) {
   const [number, setNumber] = useState(node.args[0] ?? 10)
-  const { handleNodeMouseDown, handleConnect } = useNode({
+  const { handleNodeMouseDown, handleConnectStart, handleConnectEnd } = useNode({
     node,
     onNodeSelect,
     onConnectStart,
@@ -32,17 +35,17 @@ export const NumberNode = memo(function BaseNode({
   }
 
   return (
-    <div
-      className="absolute"
-      style={{ transform: `translate(${node.position.x}px, ${node.position.y}px)` }}
-    >
-      <div className="flex flex-col items-center" onMouseDown={handleNodeMouseDown}>
+    <NodeContext node={node}>
+      <NodeContext.Node
+        className={isSelected ? 'is-dragging' : ''}
+        onMouseDown={handleNodeMouseDown}
+      >
         <Input className="w-20" type="number" value={number} onChange={handleChange} />
-        <div
-          className="w-[10px] h-[10px] border rounded-md cursor-pointer border-card-foreground"
-          onMouseDown={(e) => handleConnect(e, 'Bottom', 0)}
-        />
-      </div>
-    </div>
+      </NodeContext.Node>
+      <NodeContext.Connector
+        onConnectStart={(e) => handleConnectStart(e, 'Bottom')}
+        onConnectEnd={(e) => handleConnectEnd(e, 'Bottom', 0)}
+      />
+    </NodeContext>
   )
 })
