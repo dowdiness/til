@@ -1,4 +1,4 @@
-import type { FunctionNames } from '../graph-language'
+import type { FunctionNames } from '@/CodeEditor/graph-language'
 
 type DeepReadonly<T> = {
   readonly [P in keyof T]: DeepReadonly<T[P]>
