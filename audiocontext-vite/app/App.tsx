@@ -8,9 +8,7 @@ function App() {
     <main className="container flex flex-col items-start my-8 space-y-4">
       <h1 className="text-3xl">Graph Language</h1>
       <Divider />
-      <div className="w-full h-80">
-        <Board />
-      </div>
+      <Board />
       <Divider />
       <h2 className="text-xl">Functions</h2>
       <ul className="flex space-x-2">

@@ -1,6 +1,7 @@
 import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '@/NodeEditor/types'
 import { useCallback } from 'react'
 import { editorProxy } from '../store'
+import { boardElement } from '../useBoardRef'
 import { useTemporalEdge } from '../useTemporalEdge'
 import { useSelectedNodeId } from './useSelectedNodeId'
 
@@ -33,7 +34,7 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
   )
 
   const calculatePosition = useCallback((rect: DOMRect, hasOffset: boolean) => {
-    const boardRect = editorProxy.boardRect
+    const boardRect = boardElement.getBoundingClientRect()
     const offset = hasOffset ? 0 : rect.height
     // HACK: This is a hack to fix the border offset
     const borderPX = 1

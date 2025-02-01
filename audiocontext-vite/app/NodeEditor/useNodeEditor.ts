@@ -4,6 +4,7 @@ import { BaseEdge } from './Edges/BaseEdge'
 import { useSelectedNodeId } from './Nodes/useSelectedNodeId'
 import { editorProxy } from './store'
 import type { NewEdgeEnd, NewEdgeStart } from './types'
+import { boardElement } from './useBoardRef'
 
 export const useNodeEditor = () => {
   const [selectedNodeId, setSelectedNodeId] = useSelectedNodeId()
@@ -88,7 +89,7 @@ export const useNodeEditor = () => {
       }
 
       if (temporalEdge) {
-        const boardRect = editorProxy.boardRect
+        const boardRect = boardElement.getBoundingClientRect()
         setTemporalEdge({
           ...temporalEdge,
           to: {

@@ -4,7 +4,7 @@ export const CodeEditor = () => {
   const [snap, lang] = useLang()
 
   return (
-    <div>
+    <article className="flex flex-col items-start w-full space-y-4">
       <textarea
         id="program"
         name="program"
@@ -26,6 +26,6 @@ export const CodeEditor = () => {
       <p className="text-red-600">
         <span>{snap.error}: </span>
       </p>
-    </div>
+    </article>
   )
 }
