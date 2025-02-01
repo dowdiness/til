@@ -1,11 +1,11 @@
 import { NodeContext } from '@/components/ui/NodeUI.tsx'
 import { memo } from 'react'
-import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from './types.ts'
+import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '../types.ts'
 import { useNode } from './useNode.ts'
+import { useSelectedNodeId } from './useSelectedNodeId.ts'
 
 type NodeElementProps = {
   node: NodeSnap
-  isSelected: boolean
   onNodeSelect: (id: NodeID) => void
   onConnectStart: (edge: NewEdgeStart) => void
   onConnectEnd: (edge: NewEdgeEnd) => void
@@ -13,7 +13,6 @@ type NodeElementProps = {
 
 export const BaseNode = memo(function BaseNode({
   node,
-  isSelected,
   onNodeSelect,
   onConnectStart,
   onConnectEnd,
@@ -24,6 +23,8 @@ export const BaseNode = memo(function BaseNode({
     onConnectStart,
     onConnectEnd,
   })
+  const [selectedNodeId] = useSelectedNodeId()
+  const isSelected = node.id === selectedNodeId
 
   return (
     <NodeContext node={node}>

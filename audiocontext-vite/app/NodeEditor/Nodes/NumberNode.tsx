@@ -1,13 +1,13 @@
 import { NodeContext } from '@/components/ui/NodeUI.tsx'
 import { Input } from '@/components/ui/input.tsx'
 import { memo, useState } from 'react'
-import { editorProxy } from './store.ts'
-import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from './types.ts'
+import { editorProxy } from '../store.ts'
+import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '../types.ts'
 import { useNode } from './useNode.ts'
+import { useSelectedNodeId } from './useSelectedNodeId.ts'
 
 type NodeElementProps = {
   node: NodeSnap
-  isSelected: boolean
   onNodeSelect: (id: NodeID) => void
   onConnectStart: (edge: NewEdgeStart) => void
   onConnectEnd: (edge: NewEdgeEnd) => void
@@ -16,7 +16,6 @@ type NodeElementProps = {
 // NodeElement Component
 export const NumberNode = memo(function BaseNode({
   node,
-  isSelected,
   onNodeSelect,
   onConnectStart,
   onConnectEnd,
@@ -28,6 +27,8 @@ export const NumberNode = memo(function BaseNode({
     onConnectStart,
     onConnectEnd,
   })
+  const [selectedNodeId] = useSelectedNodeId()
+  const isSelected = node.id === selectedNodeId
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNumber(Number(e.target.value))

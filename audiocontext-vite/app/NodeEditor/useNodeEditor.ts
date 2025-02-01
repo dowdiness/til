@@ -1,11 +1,12 @@
 import { useTemporalEdge } from '@/NodeEditor/useTemporalEdge'
-import { createElement, useCallback, useState } from 'react'
-import { BaseEdge } from './BaseEdge'
+import { createElement, useCallback } from 'react'
+import { BaseEdge } from './Edges/BaseEdge'
+import { useSelectedNodeId } from './Nodes/useSelectedNodeId'
 import { editorProxy } from './store'
 import type { NewEdgeEnd, NewEdgeStart, NodeID } from './types'
 
 export const useNodeEditor = () => {
-  const [selectedNodeId, setSelectedNodeId] = useState<NodeID | null>(null)
+  const [selectedNodeId, setSelectedNodeId] = useSelectedNodeId()
   const [temporalEdge, setTemporalEdge] = useTemporalEdge()
   const hasTemporalEdge = temporalEdge !== null
 
@@ -33,9 +34,12 @@ export const useNodeEditor = () => {
     [setTemporalEdge],
   )
 
-  const handleMouseUpBoard = useCallback((_e: React.MouseEvent) => {
-    setSelectedNodeId(null)
-  }, [])
+  const handleMouseUpBoard = useCallback(
+    (_e: React.MouseEvent) => {
+      setSelectedNodeId(null)
+    },
+    [setSelectedNodeId],
+  )
 
   const handleMouseMoveBoard = useCallback(
     (e: React.MouseEvent) => {
@@ -97,16 +101,17 @@ export const useNodeEditor = () => {
     [selectedNodeId, temporalEdge, setTemporalEdge],
   )
 
-  const handleNodeSelect = (id: NodeID) => {
-    setSelectedNodeId(id)
-    setTemporalEdge(null)
-  }
+  const handleNodeSelect = useCallback(
+    (id: NodeID) => {
+      setSelectedNodeId(id)
+      setTemporalEdge(null)
+    },
+    [setSelectedNodeId, setTemporalEdge],
+  )
 
-  const EdgeComp =
-    temporalEdge && createElement(BaseEdge, { edge: temporalEdge, isSelected: false })
+  const EdgeComp = temporalEdge && createElement(BaseEdge, { edge: temporalEdge })
 
   return {
-    selectedNodeId,
     hasTemporalEdge,
     handleMouseDownBoard,
     handleMouseUpBoard,

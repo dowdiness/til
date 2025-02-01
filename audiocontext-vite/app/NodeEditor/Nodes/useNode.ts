@@ -1,6 +1,6 @@
 import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '@/NodeEditor/types'
 import { useCallback } from 'react'
-import { editorProxy } from './store'
+import { editorProxy } from '../store'
 
 type UseNodeProps = {
   node: NodeSnap

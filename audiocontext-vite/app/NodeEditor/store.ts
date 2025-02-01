@@ -1,5 +1,6 @@
+import { mutableFilter } from '@/lib/mutable'
 import { proxy, snapshot } from 'valtio'
-import { watch } from 'valtio/utils'
+import { devtools, watch } from 'valtio/utils'
 import type { EdgeID, EdgeState, NodeID, NodeState, Position } from './types'
 
 export const nodesProxy = proxy<NodeState[]>([
@@ -24,8 +25,6 @@ export const edgesProxy = proxy<EdgeState[]>([])
 type AppState = {
   nodes: NodeState[]
   edges: EdgeState[]
-  isEditingNewEdge: boolean
-  selectedEdgeId: string
   boardRect: Position
   deleteEdgeById: (id: EdgeID) => void
   getNodeById: (id: string) => NodeState | undefined
@@ -36,12 +35,9 @@ type AppState = {
 export const editorProxy = proxy<AppState>({
   nodes: nodesProxy,
   edges: edgesProxy,
-  isEditingNewEdge: false,
-  selectedEdgeId: '',
   boardRect: { x: 0, y: 0 },
   deleteEdgeById(id) {
-    this.edges = this.edges.filter((edge) => edge.id !== id)
-    this.selectedEdgeId = ''
+    mutableFilter(this.edges, (edge) => edge.id !== id)
   },
   getNodeById(id: string) {
     return this.nodes.find((node) => node.id === id)
@@ -60,6 +56,7 @@ export const editorProxy = proxy<AppState>({
   },
 })
 
+devtools(editorProxy)
 // subscribe(editorProxy, () => {
 //   console.log(snapshot(editorProxy))
 // })
