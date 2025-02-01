@@ -1,21 +1,35 @@
 import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '@/NodeEditor/types'
 import { useCallback } from 'react'
 import { editorProxy } from '../store'
+import { useTemporalEdge } from '../useTemporalEdge'
+import { useSelectedNodeId } from './useSelectedNodeId'
 
 type UseNodeProps = {
   node: NodeSnap
-  onNodeSelect: (id: NodeID) => void
+  onNodeSelect?: (id: NodeID) => void
   onConnectStart: (edge: NewEdgeStart) => void
   onConnectEnd: (edge: NewEdgeEnd) => void
 }
 
 export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: UseNodeProps) {
+  const [, setSelectedNodeId] = useSelectedNodeId()
+  const [, setTemporalEdge] = useTemporalEdge()
+
+  const handleNodeSelect = useCallback(
+    (id: NodeID) => {
+      setSelectedNodeId(id)
+      setTemporalEdge(null)
+      onNodeSelect?.(id)
+    },
+    [setSelectedNodeId, setTemporalEdge, onNodeSelect],
+  )
+
   const handleNodeMouseDown = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation()
-      onNodeSelect(node.id)
+      handleNodeSelect(node.id)
     },
-    [node.id, onNodeSelect],
+    [node.id, handleNodeSelect],
   )
 
   const calculatePosition = useCallback((rect: DOMRect, hasOffset: boolean) => {

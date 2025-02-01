@@ -3,7 +3,7 @@ import { createElement, useCallback } from 'react'
 import { BaseEdge } from './Edges/BaseEdge'
 import { useSelectedNodeId } from './Nodes/useSelectedNodeId'
 import { editorProxy } from './store'
-import type { NewEdgeEnd, NewEdgeStart, NodeID } from './types'
+import type { NewEdgeEnd, NewEdgeStart } from './types'
 
 export const useNodeEditor = () => {
   const [selectedNodeId, setSelectedNodeId] = useSelectedNodeId()
@@ -101,14 +101,6 @@ export const useNodeEditor = () => {
     [selectedNodeId, temporalEdge, setTemporalEdge],
   )
 
-  const handleNodeSelect = useCallback(
-    (id: NodeID) => {
-      setSelectedNodeId(id)
-      setTemporalEdge(null)
-    },
-    [setSelectedNodeId, setTemporalEdge],
-  )
-
   const EdgeComp = temporalEdge && createElement(BaseEdge, { edge: temporalEdge })
 
   return {
@@ -116,7 +108,6 @@ export const useNodeEditor = () => {
     handleMouseDownBoard,
     handleMouseUpBoard,
     handleMouseMoveBoard,
-    handleNodeSelect,
     handleConnectStart,
     handleConnectEnd,
     EdgeComp,

@@ -10,7 +10,6 @@ export function Board() {
     handleMouseDownBoard,
     handleMouseUpBoard,
     handleMouseMoveBoard,
-    handleNodeSelect,
     handleConnectStart,
     handleConnectEnd,
     EdgeComp,
@@ -26,11 +25,7 @@ export function Board() {
     >
       <Panel />
       <EdgeContainer />
-      <NodeContainer
-        handleNodeSelect={handleNodeSelect}
-        handleConnectStart={handleConnectStart}
-        handleConnectEnd={handleConnectEnd}
-      />
+      <NodeContainer onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd} />
       {EdgeComp}
     </div>
   )

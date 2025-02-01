@@ -5,16 +5,12 @@ import { BaseNode } from './BaseNode'
 import { NumberNode } from './NumberNode'
 
 type NodeContainerProps = React.ComponentProps<'div'> & {
-  handleNodeSelect: (id: NodeID) => void
-  handleConnectStart: (edge: NewEdgeStart) => void
-  handleConnectEnd: (edge: NewEdgeEnd) => void
+  onNodeSelect?: (id: NodeID) => void
+  onConnectStart: (edge: NewEdgeStart) => void
+  onConnectEnd: (edge: NewEdgeEnd) => void
 }
 
-export function NodeContainer({
-  handleNodeSelect,
-  handleConnectStart,
-  handleConnectEnd,
-}: NodeContainerProps) {
+export function NodeContainer({ onNodeSelect, onConnectStart, onConnectEnd }: NodeContainerProps) {
   const nodes = useSnapshot(nodesProxy)
   return (
     <div>
@@ -25,9 +21,9 @@ export function NodeContainer({
               <NumberNode
                 key={node.id}
                 node={node}
-                onNodeSelect={handleNodeSelect}
-                onConnectStart={handleConnectStart}
-                onConnectEnd={handleConnectEnd}
+                onNodeSelect={onNodeSelect}
+                onConnectStart={onConnectStart}
+                onConnectEnd={onConnectEnd}
               />
             )
           default:
@@ -35,9 +31,9 @@ export function NodeContainer({
               <BaseNode
                 key={node.id}
                 node={node}
-                onNodeSelect={handleNodeSelect}
-                onConnectStart={handleConnectStart}
-                onConnectEnd={handleConnectEnd}
+                onNodeSelect={onNodeSelect}
+                onConnectStart={onConnectStart}
+                onConnectEnd={onConnectEnd}
               />
             )
         }

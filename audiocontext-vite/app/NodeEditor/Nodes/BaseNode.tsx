@@ -6,7 +6,7 @@ import { useSelectedNodeId } from './useSelectedNodeId.ts'
 
 type NodeElementProps = {
   node: NodeSnap
-  onNodeSelect: (id: NodeID) => void
+  onNodeSelect?: (id: NodeID) => void
   onConnectStart: (edge: NewEdgeStart) => void
   onConnectEnd: (edge: NewEdgeEnd) => void
 }
