@@ -3,6 +3,7 @@ import { nodesProxy } from '../store'
 import type { NewEdgeEnd, NewEdgeStart, NodeID } from '../types'
 import { BaseNode } from './BaseNode'
 import { NumberNode } from './NumberNode'
+import { OutNode } from './OutNode'
 
 type NodeContainerProps = React.ComponentProps<'div'> & {
   onNodeSelect?: (id: NodeID) => void
@@ -19,6 +20,16 @@ export function NodeContainer({ onNodeSelect, onConnectStart, onConnectEnd }: No
           case 'n':
             return (
               <NumberNode
+                key={node.id}
+                node={node}
+                onNodeSelect={onNodeSelect}
+                onConnectStart={onConnectStart}
+                onConnectEnd={onConnectEnd}
+              />
+            )
+          case 'out':
+            return (
+              <OutNode
                 key={node.id}
                 node={node}
                 onNodeSelect={onNodeSelect}

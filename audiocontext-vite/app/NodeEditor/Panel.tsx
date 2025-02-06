@@ -4,7 +4,7 @@ const nodeTypes = [
   {
     key: crypto.randomUUID(),
     type: 'n',
-    args: [20],
+    args: [1],
     ins: [],
   },
   {
@@ -31,13 +31,26 @@ const nodeTypes = [
     args: [null, null],
     ins: [null, null],
   },
+  {
+    key: crypto.randomUUID(),
+    type: 'out',
+    args: [null],
+    ins: [null],
+  },
 ] satisfies AddNodeProps[]
 
 export function Panel() {
   return (
     <div className="absolute z-10 flex mx-4 my-2 space-x-2">
       {nodeTypes.map((nodeData) => {
-        return <AddNode key={nodeData.key} type={nodeData.type} args={nodeData.args} ins={nodeData.ins} />
+        return (
+          <AddNode
+            key={nodeData.key}
+            type={nodeData.type}
+            args={nodeData.args}
+            ins={nodeData.ins}
+          />
+        )
       })}
     </div>
   )

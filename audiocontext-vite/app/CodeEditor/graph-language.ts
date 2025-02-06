@@ -57,16 +57,16 @@ export class LangNode {
    * Constructor for initializing a new instance of the Node.
    *
    * @param {string} type - The type of the instance to be created.
-   * @param {...number|LangNode} ins - The instance data or configuration.
+   * @param {Array.<number|LangNode|null>} ins - The instance data or configuration.
    * @param {(node: LangNode, ref: string | number, args: (string | number)[]) => string} [compileSelf] - Optional custom compile function.
    */
   constructor(
     type: string,
-    ins: (LangNode | number)[],
+    ins: (LangNode | number | null)[],
     compileSelf?: (node: LangNode, ref: string | number, args: (string | number)[]) => string,
   ) {
     this.type = type
-    this.ins = ins
+    this.ins = ins.map((inlet) => (inlet === null ? 0 : inlet))
     if (compileSelf) {
       this.compileSelf = compileSelf
     } else {
@@ -140,17 +140,21 @@ const registerNode = (type: string) => {
 }
 
 export const funcs = [
+  { name: 'n', symbol: 'n', func: (a: number) => a },
   { name: 'add', symbol: '+', func: (a: number, b: number) => a + b },
   { name: 'sub', symbol: '-', func: (a: number, b: number) => a - b },
   { name: 'mul', symbol: '*', func: (a: number, b: number) => a * b },
   { name: 'div', symbol: '/', func: (a: number, b: number) => a / b },
+  { name: 'out', symbol: '=', func: (a: number) => a },
 ]
 
 export const lib = {
+  n: (a: number) => a,
   add: (a: number, b: number) => a + b,
   sub: (a: number, b: number) => a - b,
   mul: (a: number, b: number) => a * b,
   div: (a: number, b: number) => a / b,
+  out: (a: number) => a,
 }
 
 export type FunctionNames = keyof typeof lib
@@ -161,7 +165,9 @@ const getKeys = <T extends { [key: string]: unknown }>(obj: T): (keyof T)[] => {
 
 export const functionNames = getKeys(lib) satisfies FunctionNames[]
 
-const registers = Object.fromEntries(Object.keys(lib).map((name) => [name, registerNode(`${name}`)]))
+const registers = Object.fromEntries(
+  Object.keys(lib).map((name) => [name, registerNode(`${name}`)]),
+)
 
 /**
  * Topologically sorts the nodes in the graph.
@@ -180,7 +186,10 @@ const registers = Object.fromEntries(Object.keys(lib).map((name) => [name, regis
  * @param {Set.<LangNode>} [visited=new Set()] - The set of visited nodes.
  * @yields {LangNode} - The next node in the sorted order.
  */
-function* topoSort(node: LangNode | number, visited = new Set<LangNode>()): Generator<LangNode, undefined> {
+function* topoSort(
+  node: LangNode | number,
+  visited = new Set<LangNode>(),
+): Generator<LangNode, undefined> {
   if (!(node instanceof LangNode) || visited.has(node)) {
     return // constant values or already visited nodes
   }
@@ -248,11 +257,11 @@ export const interpreter = {
    */
   update: (input: string) => {
     // Create root node
-    const rootNode = interpreter.createNode(input) as LangNode
+    const outNode = interpreter.createNode(input) as LangNode
     // Reset initial state and start step interpreter
-    interpreter.reset(rootNode, input)
+    interpreter.reset(outNode, input)
     // Genarate code that passed to new Function
-    const unit = rootNode.compile()
+    const unit = outNode.compile()
     unit.lines.push(`return ${unit.last}`)
     const code = unit.lines.join('\n')
     // Apply lib functions to generated code, you can use any functions in lib object like this.

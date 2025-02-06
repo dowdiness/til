@@ -3,13 +3,15 @@ import { useTemporalEdge } from '@/NodeEditor/useTemporalEdge'
 import { cn } from '@/lib/utils'
 import { createContext, useCallback, useContext } from 'react'
 
-const InnerContext = createContext<NodeSnap>({
+const defaultNode: NodeSnap = {
   id: `node-${crypto.randomUUID()}`,
   type: 'n',
   args: [20],
   ins: [],
   position: { x: 60, y: 30 },
-})
+}
+
+const InnerContext = createContext<NodeSnap>(defaultNode)
 
 type NodeContextProps = React.ComponentProps<'div'> & {
   node: NodeSnap

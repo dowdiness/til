@@ -7,7 +7,7 @@ export type LangProxy = typeof langProxy
 export type LangSnap = Readonly<LangProxy>
 export type OnCodeChenge = (code: string) => void
 
-const langProxy = proxy({
+export const langProxy = proxy({
   code: 'add(3, 2).mul(2).sub(3).div(2)',
   steps: '',
   result: '',
@@ -46,6 +46,7 @@ export const useLang = (onCodechange?: OnCodeChenge): [LangSnap, LangProxy] => {
     [onCodechange],
   )
 
+  // Execute compiling when code is changed.
   useEffect(() => {
     const unsubscribe = subscribeKey(langProxy, 'code', handleCodeChange)
     handleCodeChange(langSnap.code)
