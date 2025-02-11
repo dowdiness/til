@@ -5,30 +5,35 @@ import { proxy, snapshot } from 'valtio'
 import { devtools, watch } from 'valtio/utils'
 import type { EdgeID, EdgeSnap, EdgeState, NodeID, NodeSnap, NodeState } from './types'
 
+const n1: NodeID = `node-${crypto.randomUUID()}`
+const n2: NodeID = `node-${crypto.randomUUID()}`
+const add: NodeID = `node-${crypto.randomUUID()}`
+const out: NodeID = `node-${crypto.randomUUID()}`
+
 export const nodesProxy = proxy<NodeState[]>([
   {
-    id: `node-${crypto.randomUUID()}`,
+    id: n1,
     type: 'n',
     args: [3],
     ins: [],
     position: { x: 100, y: 60 },
   },
   {
-    id: `node-${crypto.randomUUID()}`,
+    id: n2,
     type: 'n',
     args: [5],
     ins: [],
     position: { x: 300, y: 60 },
   },
   {
-    id: `node-${crypto.randomUUID()}`,
+    id: add,
     type: 'add',
     args: [],
     ins: [null, null],
     position: { x: 200, y: 150 },
   },
   {
-    id: `node-${crypto.randomUUID()}`,
+    id: out,
     type: 'out',
     args: [],
     ins: [null],
@@ -36,7 +41,36 @@ export const nodesProxy = proxy<NodeState[]>([
   },
 ])
 
-export const edgesProxy = proxy<EdgeState[]>([])
+const edge1: EdgeID = `edge-${crypto.randomUUID()}`
+const edge2: EdgeID = `edge-${crypto.randomUUID()}`
+const edge3: EdgeID = `edge-${crypto.randomUUID()}`
+
+export const edgesProxy = proxy<EdgeState[]>([
+  {
+    id: edge1,
+    from: { x: 147, y: 117 },
+    fromId: n1,
+    to: { x: 230, y: 151 },
+    toId: add,
+    handlePosition: 0,
+  },
+  {
+    id: edge2,
+    from: { x: 349, y: 117 },
+    fromId: n2,
+    to: { x: 264, y: 151 },
+    toId: add,
+    handlePosition: 1,
+  },
+  {
+    id: edge3,
+    from: { x: 248, y: 217 },
+    fromId: add,
+    to: { x: 248, y: 250 },
+    toId: out,
+    handlePosition: 0,
+  },
+])
 
 type AppState = {
   nodes: NodeState[]
@@ -98,7 +132,7 @@ function convertNodes(nodes: readonly NodeSnap[], edges: readonly EdgeSnap[]) {
   // Create LangNode based on node editor.
   for (const node of nodes) {
     if (node.type === 'out') {
-      // Convert numeric arguments, map on null values to 0
+      // Convert numeric arguments, map null values onto 0
       const args = node.args.map((arg) => (arg === null ? 0 : arg))
       NodeMap.set(
         node.id,
@@ -107,7 +141,7 @@ function convertNodes(nodes: readonly NodeSnap[], edges: readonly EdgeSnap[]) {
         }),
       )
     } else {
-      // Convert numeric arguments, map on null values to 0
+      // Convert numeric arguments, map null values onto 0
       const args = node.args.map((arg) => (arg === null ? 0 : arg))
       NodeMap.set(node.id, new LangNode(node.type, args))
     }

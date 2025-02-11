@@ -1,7 +1,7 @@
-import { useCallback, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { proxy, useSnapshot } from 'valtio'
 import { subscribeKey } from 'valtio/utils'
-import { interpreter } from './graph-language'
+import { Interpreter, interpreter } from './graph-language'
 
 export type LangProxy = typeof langProxy
 export type LangSnap = Readonly<LangProxy>
@@ -18,40 +18,51 @@ export const langProxy = proxy({
 })
 
 export const compile = (code: string) => {
-  try {
-    const [steps, result] = interpreter.update(code)
-    langProxy.steps = steps
-    langProxy.result = `${result}`
-    langProxy.error = ''
-  } catch (e) {
-    if (e instanceof TypeError) {
-      langProxy.error = `TypeError: ${e.message}`
-    } else if (e instanceof SyntaxError) {
-      langProxy.error = `SyntaxError: ${e.message}`
-    } else if (e instanceof Error) {
-      langProxy.error = e.message
-    }
-  }
+  const [steps, result] = interpreter.compile(code)
+  langProxy.steps = steps
+  langProxy.result = `${result}`
+  langProxy.error = interpreter.getState().errorMessage
 }
 
-export const useLang = (onCodechange?: OnCodeChenge): [LangSnap, LangProxy] => {
+export const step = (code: string) => {
+  const interpreter = new Interpreter()
+  interpreter.init(code)
+  const handler = () => {
+    const [steps, result] = interpreter.step()
+    langProxy.steps = steps
+    langProxy.result = `${result}`
+    langProxy.error = interpreter.getState().errorMessage
+  }
+  return window.setInterval(handler, 2000)
+}
+
+export const useLang = (
+  onCodechange?: OnCodeChenge,
+): [LangSnap, LangProxy, boolean, React.Dispatch<React.SetStateAction<boolean>>] => {
+  const [isStep, setIsStep] = useState(false)
   const langSnap = useSnapshot(langProxy, { sync: true })
-  const handleCodeChange = useCallback(
-    (code: string) => {
-      compile(code)
-      if (onCodechange) {
-        onCodechange(code)
-      }
-    },
-    [onCodechange],
-  )
 
   // Execute compiling when code is changed.
   useEffect(() => {
+    let intervalID = 0
+    const handleCodeChange = (code: string) => {
+      if (isStep) {
+        intervalID = step(code)
+      } else {
+        compile(code)
+      }
+      if (onCodechange) {
+        onCodechange(code)
+      }
+    }
+
     const unsubscribe = subscribeKey(langProxy, 'code', handleCodeChange)
     handleCodeChange(langSnap.code)
-    return unsubscribe
-  }, [langSnap.code, handleCodeChange])
+    return () => {
+      window.clearInterval(intervalID)
+      unsubscribe()
+    }
+  }, [langSnap.code, isStep, onCodechange])
 
-  return [langSnap, langProxy]
+  return [langSnap, langProxy, isStep, setIsStep]
 }

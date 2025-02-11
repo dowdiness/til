@@ -48,10 +48,11 @@ const getRef = (nodes: LangNode[]) => (input: number | LangNode) => {
  * Represents a node in the language graph.
  */
 export class LangNode {
-  /** @member {string} */
-  type = 'add'
+  /** @member {FunctionNames} */
+  type: FunctionNames = 'add'
   /** @member {Array.<number|LangNode>} */
-  ins: (LangNode | number)[]
+  _ins: (LangNode | number)[] = []
+  private _sortedCache: LangNode[] | null = null
 
   /**
    * Constructor for initializing a new instance of the Node.
@@ -61,7 +62,7 @@ export class LangNode {
    * @param {(node: LangNode, ref: string | number, args: (string | number)[]) => string} [compileSelf] - Optional custom compile function.
    */
   constructor(
-    type: string,
+    type: FunctionNames,
     ins: (LangNode | number | null)[],
     compileSelf?: (node: LangNode, ref: string | number, args: (string | number)[]) => string,
   ) {
@@ -80,6 +81,23 @@ export class LangNode {
         return `let ${ref} = lib.${node.type}(${args.join(',')})`
       }
     }
+  }
+
+  get ins(): (LangNode | number)[] {
+    return this._ins
+  }
+
+  // Reset cache when inputs change
+  set ins(value: (LangNode | number)[]) {
+    this._sortedCache = null
+    this._ins = value
+  }
+
+  getSortedNodes(): LangNode[] {
+    if (!this._sortedCache) {
+      this._sortedCache = topoSort(this)
+    }
+    return this._sortedCache
   }
 
   /**
@@ -117,6 +135,7 @@ export class LangNode {
    * @param {string | number} ref - The reference for the node.
    * @param {(string | number)[]} args - The arguments for the node.
    * @returns {string} - The compiled code for the node.
+   * TODO Currentry this function is not used.
    */
   compileSelf(node: LangNode, ref: string | number, args: (string | number)[]) {
     return `let ${ref} = lib.${node.type}(${args.join(',')})`
@@ -129,7 +148,7 @@ export class LangNode {
  * @param {string} type - The type of the node to register.
  * @returns {(...args: any[]) => LangNode} - A function to create a new node of the specified type.
  */
-const registerNode = (type: string) => {
+const registerNode = (type: FunctionNames) => {
   // @ts-ignore
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   LangNode.prototype[type] = function (...args: any[]) {
@@ -165,12 +184,10 @@ const getKeys = <T extends { [key: string]: unknown }>(obj: T): (keyof T)[] => {
 
 export const functionNames = getKeys(lib) satisfies FunctionNames[]
 
-const registers = Object.fromEntries(
-  Object.keys(lib).map((name) => [name, registerNode(`${name}`)]),
-)
+const registers = Object.fromEntries(getKeys(lib).map((name) => [name, registerNode(name)]))
 
 /**
- * Topologically sorts the nodes in the graph.
+ * Topologically sort the nodes in the graph.
  *
  * We need to organize expression execution order.
  * For Example, if we get this expression,
@@ -181,121 +198,207 @@ const registers = Object.fromEntries(
  *   let v2 = lib.add(5,v1)
  *   return v2
  *
- * @generator
  * @param {LangNode | number} node - The starting node.
- * @param {Set.<LangNode>} [visited=new Set()] - The set of visited nodes.
- * @yields {LangNode} - The next node in the sorted order.
+ * @yields {LangNode[]} - The sorted nodes.
  */
-function* topoSort(
-  node: LangNode | number,
-  visited = new Set<LangNode>(),
-): Generator<LangNode, undefined> {
-  if (!(node instanceof LangNode) || visited.has(node)) {
-    return // constant values or already visited nodes
+function topoSort(startNode: LangNode | number): LangNode[] {
+  if (!(startNode instanceof LangNode)) {
+    return []
   }
-  visited.add(node)
-  for (const input of node.ins) {
-    yield* topoSort(input, visited)
-  }
-  yield node
-}
 
-/**
- * Runs the generated code with the provided library.
- * create root Node class
- *
- * @param {string} code - The code to run.
- * @param {{ [k: string]: (...args: number[]) => LangNode }} lib - The library of functions.
- * @returns {any} - The result of the executed code.
- */
-const run = (
-  code: string,
-  registers: {
-    [k: string]: (...args: number[]) => LangNode
-  },
-) => {
-  const keys = Object.keys(registers)
-  const values = Object.values(registers)
-  return new Function(...keys, code)(...values)
-}
+  const result: LangNode[] = []
+  const visited = new Set<LangNode>()
+  const visiting = new Set<LangNode>()
+  const stack: [LangNode, number][] = [[startNode, 0]]
 
-let timeout: number | undefined
-let generator: Generator<LangNode, undefined> | undefined
-let visited: LangNode[] = []
-let lines: string[] = []
+  while (stack.length > 0) {
+    const [node, childIndex] = stack[stack.length - 1]
 
-export const interpreter = {
-  /**
-   * Resets the interpreter with the given node and input.
-   *
-   * @param {LangNode | number} node - The root node.
-   * @param {string} input - The input code.
-   */
-  reset: (node: LangNode | number, input: string) => {
-    // Reset initial state.
-    clearTimeout(timeout)
-    generator = topoSort(node)
-    visited = []
-    lines = []
-    // Start interpreter step by step
-    interpreter.step(input)
-  },
-
-  /**
-   * Creates a new node from the given code.
-   *
-   * @param {string} code - The code to create the node from.
-   * @returns {LangNode} - The created node.
-   */
-  createNode: (code: string) => run(`return ${code}`, registers),
-
-  /**
-   * Start or updates the interpreter with the given input.
-   *
-   * @param {string} input - The input code.
-   * @returns {[string, number]} - The compiled code and the result.
-   */
-  update: (input: string) => {
-    // Create root node
-    const outNode = interpreter.createNode(input) as LangNode
-    // Reset initial state and start step interpreter
-    interpreter.reset(outNode, input)
-    // Genarate code that passed to new Function
-    const unit = outNode.compile()
-    unit.lines.push(`return ${unit.last}`)
-    const code = unit.lines.join('\n')
-    // Apply lib functions to generated code, you can use any functions in lib object like this.
-    // `lib.add(1, 3)`
-    const fn = new Function('lib', code)
-    const res = fn(lib) as number
-    //
-    return [code, res] as const
-  },
-
-  /**
-   * Executes the next step in the interpreter.
-   *
-   * @param {string} input - The input code.
-   */
-  step: (input: string) => {
-    if (!generator) return
-    const res = generator.next()
-    const current = res?.value
-    if (current) {
-      // Executed on each step
-      visited.push(current)
-      const args = current.ins.map(getRef(visited))
-      const line = current.compileSelf(current, getRef(visited)(current), args)
-      lines.push(line)
-      timeout = window.setTimeout(() => interpreter.step(input), 1000)
-    } else if (res?.done) {
-      // Executed on final step
-      lines.push(`return ${getRef(visited)(visited[visited.length - 1])}`)
-      const code = lines.join('\n')
-      const res = new Function('lib', code)(lib)
-      lines.push(`// result: ${res}`)
-      const node = interpreter.createNode(input) as LangNode
-      timeout = window.setTimeout(() => interpreter.reset(node, input), 2000)
+    if (childIndex >= node.ins.length) {
+      stack.pop()
+      if (!visited.has(node)) {
+        visited.add(node)
+        result.push(node)
+      }
+      continue
     }
-  },
+
+    const input = node.ins[childIndex]
+    stack[stack.length - 1][1]++
+
+    if (input instanceof LangNode && !visited.has(input)) {
+      if (visiting.has(input)) {
+        throw new Error('Cyclic dependency detected')
+      }
+      visiting.add(input)
+      stack.push([input, 0])
+    }
+  }
+
+  return result
 }
+
+type InterpreterState = {
+  initialNode: LangNode | null
+  sortedNodes: LangNode[]
+  executionIndex: number
+  variables: Map<string, number>
+  steps: string[]
+  lastResult: number
+  errorMessage: string
+}
+
+export class Interpreter {
+  private state: InterpreterState
+
+  constructor() {
+    this.state = {
+      initialNode: null,
+      sortedNodes: [],
+      executionIndex: 0,
+      variables: new Map(),
+      steps: [],
+      lastResult: 0,
+      errorMessage: '',
+    }
+  }
+
+  private handleError(e: unknown) {
+    if (e instanceof TypeError) {
+      this.state.errorMessage = `TypeError: ${e.message}`
+    } else if (e instanceof SyntaxError) {
+      this.state.errorMessage = `SyntaxError: ${e.message}`
+    } else if (e instanceof Error) {
+      this.state.errorMessage = e.message
+    }
+  }
+
+  private reset(node: LangNode) {
+    try {
+      this.state = {
+        initialNode: node,
+        sortedNodes: topoSort(node),
+        executionIndex: 0,
+        variables: new Map(),
+        steps: [],
+        lastResult: 0,
+        errorMessage: '',
+      }
+    } catch (e) {
+      this.handleError(e)
+    }
+  }
+
+  private getNodeReference(node: LangNode | number): string | number {
+    if (typeof node === 'number') {
+      return node
+    }
+    const index = this.state.sortedNodes.indexOf(node)
+    return `v${index}`
+  }
+
+  private executeNode(node: LangNode): number {
+    const refs = node.ins.map((input) => {
+      if (typeof input === 'number') {
+        return input
+      }
+      return this.getNodeReference(input)
+    })
+
+    const args = node.ins.map((input) => {
+      if (typeof input === 'number') {
+        return input
+      }
+      const ref = this.getNodeReference(input)
+      return this.state.variables.get(ref.toString()) ?? 0
+    })
+
+    // @ts-expect-error args length can be different
+    const result = lib[node.type](...args)
+    const ref = this.getNodeReference(node)
+    this.state.variables.set(ref.toString(), result)
+
+    const line = `let ${ref} = lib.${node.type}(${refs.join(',')}) // = ${result}`
+    this.state.steps.push(line)
+
+    return result
+  }
+
+  init(code: string) {
+    try {
+      // Create and validate the node
+      const node = this.createNode(code)
+      this.reset(node)
+    } catch (e) {
+      this.handleError(e)
+    }
+  }
+
+  step(): [string, number] {
+    if (this.state.errorMessage.length > 0) {
+      return [this.state.errorMessage, this.state.lastResult]
+    }
+    // Reset interpreter if all nodes are already executed.
+    if (this.state.executionIndex >= this.state.sortedNodes.length) {
+      if (this.state.initialNode) {
+        this.reset(this.state.initialNode)
+      }
+      return [this.state.steps.join('\n'), this.state.lastResult]
+    }
+    try {
+      const node = this.state.sortedNodes[this.state.executionIndex]
+      this.state.lastResult = this.executeNode(node)
+      this.state.executionIndex++
+      return [this.state.steps.join('\n'), this.state.lastResult]
+    } catch (e) {
+      this.handleError(e)
+      return [String(e), this.state.lastResult]
+    }
+  }
+
+  compile(code: string): [string, number] {
+    try {
+      // Create and validate the node
+      const node = this.createNode(code)
+      this.reset(node)
+
+      // Execute all nodes immediately
+      for (const node of this.state.sortedNodes) {
+        this.state.lastResult = this.executeNode(node)
+      }
+
+      return [this.state.steps.join('\n'), this.state.lastResult]
+    } catch (e) {
+      this.handleError(e)
+      return [String(e), this.state.lastResult]
+    }
+  }
+
+  /**
+   * Create root LangNode class by code.
+   *
+   * @param {string} code - The code to create LangNode instance.
+   * @return {LangNode} - The generated instance of LangNode class.
+   */
+  createNode(code: string): LangNode {
+    const keys = Object.keys(registers)
+    const values = Object.values(registers)
+    return new Function(...keys, `return ${code}`)(...values)
+  }
+
+  getState(): Readonly<InterpreterState> {
+    return { ...this.state }
+  }
+
+  // Debug utilities
+  getExecutionTrace(): string {
+    return this.state.steps.join('\n')
+  }
+
+  getVariableState(): Map<string, number> {
+    return new Map(this.state.variables)
+  }
+}
+
+// Create a singleton instance
+export const interpreter = new Interpreter()
