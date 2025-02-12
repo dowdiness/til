@@ -6,7 +6,10 @@ export function EdgeContainer() {
   const snap = useSnapshot(editorProxy)
 
   return (
-    <div>
+    <div
+      className="absolute inset-0 z-10 w-full h-full pointer-events-none"
+      style={{ transformStyle: 'flat', willChange: 'transform' }}
+    >
       {snap.edges.map((edge) => (
         <BaseEdge key={edge.id} edge={edge} />
       ))}

@@ -41,7 +41,7 @@ const nodeTypes = [
 
 export function Panel() {
   return (
-    <div className="absolute z-10 flex mx-4 my-2 space-x-2">
+    <div className="absolute z-50 flex mx-4 my-2 space-x-2">
       {nodeTypes.map((nodeData) => {
         return (
           <AddNode

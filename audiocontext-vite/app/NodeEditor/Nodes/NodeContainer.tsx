@@ -14,7 +14,7 @@ type NodeContainerProps = React.ComponentProps<'div'> & {
 export function NodeContainer({ onNodeSelect, onConnectStart, onConnectEnd }: NodeContainerProps) {
   const nodes = useSnapshot(nodesProxy)
   return (
-    <div>
+    <div className="absolute inset-0 z-20 pointer-events-none">
       {nodes.map((node) => {
         switch (node.type) {
           case 'n':

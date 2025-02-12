@@ -27,7 +27,6 @@ export const useConnect = () => {
 
   const handleConnectStart = useCallback(
     (edge: NewEdgeStart) => {
-      console.log(edge)
       setTemporalEdge(edge)
     },
     [setTemporalEdge],
@@ -44,7 +43,6 @@ export const useConnect = () => {
   )
 
   const EdgeComp = temporalEdge && createElement(BaseEdge, { edge: temporalEdge })
-  console.log(EdgeComp)
   return {
     temporalEdge,
     setTemporalEdge,

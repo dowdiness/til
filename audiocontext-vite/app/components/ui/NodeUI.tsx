@@ -22,7 +22,7 @@ function NodeContext({ node, children, ...rest }: NodeContextProps) {
   return (
     <InnerContext value={node}>
       <div
-        className="absolute flex flex-col items-center"
+        className="absolute flex flex-col items-center pointer-events-auto transform-3d will-change-transform"
         style={{
           transform: `translate(${node.position.x}px, ${node.position.y}px)`,
         }}
@@ -41,19 +41,22 @@ type NodeConnectorProps = React.ComponentProps<'div'> & {
 
 function NodeConnector({ onConnectStart, onConnectEnd, ...rest }: NodeConnectorProps) {
   const temporalEdge = useAtomValue(temporalEdgeAtom)
+  const node = useContext(InnerContext)
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       e.stopPropagation()
       if (e.target instanceof HTMLElement) {
         e.target.setPointerCapture(e.pointerId)
       }
-      if (temporalEdge) {
+      // If there's a temporal edge and this node is not the source node
+      if (temporalEdge && temporalEdge.fromId !== node.id) {
         onConnectEnd(e)
-      } else {
+      } else if (!temporalEdge) {
+        // Only start a new connection if there's no temporal edge
         onConnectStart(e)
       }
     },
-    [onConnectEnd, onConnectStart, temporalEdge],
+    [onConnectEnd, onConnectStart, temporalEdge, node.id],
   )
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
