@@ -25,9 +25,12 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
     [setSelectedNodeId, setTemporalEdge, onNodeSelect],
   )
 
-  const handleNodeMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+  const handleNodePointerDown = useCallback(
+    (e: React.PointerEvent) => {
       e.stopPropagation()
+      if (e.target instanceof HTMLElement) {
+        e.target.setPointerCapture(e.pointerId)
+      }
       handleNodeSelect(node.id)
     },
     [node.id, handleNodeSelect],
@@ -45,8 +48,11 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
   }, [])
 
   const handleConnectStart = useCallback(
-    (e: React.MouseEvent, placement: 'Top' | 'Bottom') => {
+    (e: React.PointerEvent, placement: 'Top' | 'Bottom') => {
       e.stopPropagation()
+      if (e.target instanceof HTMLElement) {
+        e.target.setPointerCapture(e.pointerId)
+      }
       const position = calculatePosition(
         (e.target as HTMLElement).getBoundingClientRect(),
         placement === 'Top',
@@ -63,8 +69,11 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
   )
 
   const handleConnectEnd = useCallback(
-    (e: React.MouseEvent, placement: 'Top' | 'Bottom', index: number) => {
+    (e: React.PointerEvent, placement: 'Top' | 'Bottom', index: number) => {
       e.stopPropagation()
+      if (e.target instanceof HTMLElement) {
+        e.target.releasePointerCapture(e.pointerId)
+      }
       const position = calculatePosition(
         (e.target as HTMLElement).getBoundingClientRect(),
         placement === 'Top',
@@ -75,5 +84,5 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
     [node.id, onConnectEnd, calculatePosition],
   )
 
-  return { handleNodeMouseDown, handleConnectStart, handleConnectEnd }
+  return { handleNodePointerDown, handleConnectStart, handleConnectEnd }
 }

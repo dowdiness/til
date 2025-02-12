@@ -28,60 +28,68 @@ export const useNodeEditor = () => {
     [temporalEdge, setTemporalEdge],
   )
 
-  const handleMouseDownBoard = useCallback(
-    (_e: React.MouseEvent) => {
+  const handlePointerDownBoard = useCallback(
+    (e: React.PointerEvent) => {
       setTemporalEdge(null)
+      if (e.target instanceof HTMLElement) {
+        e.target.setPointerCapture(e.pointerId)
+      }
     },
     [setTemporalEdge],
   )
 
-  const handleMouseUpBoard = useCallback(
-    (_e: React.MouseEvent) => {
+  const handlePointerUpBoard = useCallback(
+    (e: React.PointerEvent) => {
       setSelectedNodeId(null)
+      if (e.target instanceof HTMLElement) {
+        e.target.releasePointerCapture(e.pointerId)
+      }
     },
     [setSelectedNodeId],
   )
 
-  const handleMouseMoveBoard = useCallback(
-    (e: React.MouseEvent) => {
+  const handlePointerMoveBoard = useCallback(
+    (e: React.PointerEvent) => {
       if (selectedNodeId) {
         const { nodes, edges } = editorProxy
         const selectedNode = nodes.find((node) => node.id === selectedNodeId)
         if (!selectedNode) return
 
-        // Update nodes position.
-        // FIXME Maybe we should not update every element in array...
+        // Calculate movement based on pointer movement
+        const movementX = e.movementX
+        const movementY = e.movementY
+
+        // Update nodes position
         nodes.forEach((node, i) => {
           nodes[i] =
             selectedNode.id === node.id
               ? {
                   ...node,
                   position: {
-                    x: node.position.x + e.movementX,
-                    y: node.position.y + e.movementY,
+                    x: node.position.x + movementX,
+                    y: node.position.y + movementY,
                   },
                 }
               : node
         })
 
-        // Update edges position.
-        // FIXME Maybe we should not update every element in array...
+        // Update edges position
         edges.forEach((edge, i) => {
           edges[i] =
             selectedNode.id === edge.fromId
               ? {
                   ...edge,
                   from: {
-                    x: edge.from.x + e.movementX,
-                    y: edge.from.y + e.movementY,
+                    x: edge.from.x + movementX,
+                    y: edge.from.y + movementY,
                   },
                 }
               : selectedNode.id === edge.toId
                 ? {
                     ...edge,
                     to: {
-                      x: edge.to.x + e.movementX,
-                      y: edge.to.y + e.movementY,
+                      x: edge.to.x + movementX,
+                      y: edge.to.y + movementY,
                     },
                   }
                 : edge
@@ -106,9 +114,9 @@ export const useNodeEditor = () => {
 
   return {
     hasTemporalEdge,
-    handleMouseDownBoard,
-    handleMouseUpBoard,
-    handleMouseMoveBoard,
+    handlePointerDownBoard,
+    handlePointerUpBoard,
+    handlePointerMoveBoard,
     handleConnectStart,
     handleConnectEnd,
     EdgeComp,

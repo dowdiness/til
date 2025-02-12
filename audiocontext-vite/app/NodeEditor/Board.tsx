@@ -7,9 +7,9 @@ import { useNodeEditor } from './useNodeEditor'
 export function Board() {
   const boardRef = useBoardRef()
   const {
-    handleMouseDownBoard,
-    handleMouseUpBoard,
-    handleMouseMoveBoard,
+    handlePointerDownBoard,
+    handlePointerUpBoard,
+    handlePointerMoveBoard,
     handleConnectStart,
     handleConnectEnd,
     EdgeComp,
@@ -18,10 +18,10 @@ export function Board() {
   return (
     <article
       ref={boardRef}
-      className="relative block w-full border h-80 border-zinc-400"
-      onMouseDown={handleMouseDownBoard}
-      onMouseUp={handleMouseUpBoard}
-      onMouseMove={handleMouseMoveBoard}
+      className="relative block w-full border h-80 border-zinc-400 touch-none"
+      onPointerDown={handlePointerDownBoard}
+      onPointerUp={handlePointerUpBoard}
+      onPointerMove={handlePointerMoveBoard}
     >
       <Panel />
       <EdgeContainer />

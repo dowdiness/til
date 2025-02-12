@@ -34,15 +34,18 @@ function NodeContext({ node, children, ...rest }: NodeContextProps) {
 }
 
 type NodeConnectorProps = React.ComponentProps<'div'> & {
-  onConnectStart: (e: React.MouseEvent) => void
-  onConnectEnd: (e: React.MouseEvent) => void
+  onConnectStart: (e: React.PointerEvent) => void
+  onConnectEnd: (e: React.PointerEvent) => void
 }
 
 function NodeConnector({ onConnectStart, onConnectEnd, ...rest }: NodeConnectorProps) {
   const [temporalEdge] = useTemporalEdge()
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
       e.stopPropagation()
+      if (e.target instanceof HTMLElement) {
+        e.target.setPointerCapture(e.pointerId)
+      }
       if (temporalEdge) {
         onConnectEnd(e)
       } else {
@@ -52,10 +55,17 @@ function NodeConnector({ onConnectStart, onConnectEnd, ...rest }: NodeConnectorP
     [onConnectEnd, onConnectStart, temporalEdge],
   )
 
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (e.target instanceof HTMLElement) {
+      e.target.releasePointerCapture(e.pointerId)
+    }
+  }, [])
+
   return (
     <div
-      className="w-[10px] h-[10px] border rounded-md cursor-pointer border-card-foreground"
-      onMouseDown={handleMouseDown}
+      className="w-[10px] h-[10px] border rounded-md cursor-pointer border-card-foreground touch-none"
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
       {...rest}
     />
   )
@@ -75,16 +85,34 @@ function NodeConnectors({ connector, ...rest }: NodeConnectorsProps) {
 }
 
 type NodeMainProps = React.ComponentProps<'div'> & {
-  onMouseDown: (e: React.MouseEvent) => void
+  onPointerDown: (e: React.PointerEvent) => void
 }
-function NodeMain({ className, children, onMouseDown, ...rest }: NodeMainProps) {
+function NodeMain({ className, children, onPointerDown, ...rest }: NodeMainProps) {
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.target instanceof HTMLElement) {
+        e.target.setPointerCapture(e.pointerId)
+      }
+      onPointerDown(e)
+    },
+    [onPointerDown],
+  )
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    if (e.target instanceof HTMLElement) {
+      e.target.releasePointerCapture(e.pointerId)
+    }
+  }, [])
+
   return (
     <div
       className={cn(
         'flex items-center justify-center w-24 h-12 px-8 py-4 text-base transition-colors bg-transparent border rounded-md shadow-sm cursor-pointer [&.is-dragging]:cursor-grabbing border-card-foreground active-visible:outline-none active-visible:ring-1 active-visible:ring-ring md:text-sm',
+        'touch-none',
         className,
       )}
-      onMouseDown={onMouseDown}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
       {...rest}
     >
       {children}

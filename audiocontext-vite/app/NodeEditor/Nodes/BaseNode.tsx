@@ -17,7 +17,7 @@ export const BaseNode = memo(function BaseNode({
   onConnectStart,
   onConnectEnd,
 }: NodeElementProps) {
-  const { handleNodeMouseDown, handleConnectStart, handleConnectEnd } = useNode({
+  const { handleNodePointerDown, handleConnectStart, handleConnectEnd } = useNode({
     node,
     onNodeSelect,
     onConnectStart,
@@ -39,7 +39,7 @@ export const BaseNode = memo(function BaseNode({
       />
       <NodeContext.Node
         className={isSelected ? 'is-dragging' : ''}
-        onMouseDown={handleNodeMouseDown}
+        onPointerDown={handleNodePointerDown}
       >
         {node.type}
       </NodeContext.Node>

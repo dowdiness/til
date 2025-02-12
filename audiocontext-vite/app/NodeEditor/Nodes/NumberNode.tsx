@@ -21,7 +21,7 @@ export const NumberNode = memo(function BaseNode({
   onConnectEnd,
 }: NodeElementProps) {
   const [number, setNumber] = useState(node.args[0] ?? 10)
-  const { handleNodeMouseDown, handleConnectStart, handleConnectEnd } = useNode({
+  const { handleNodePointerDown, handleConnectStart, handleConnectEnd } = useNode({
     node,
     onNodeSelect,
     onConnectStart,
@@ -39,7 +39,7 @@ export const NumberNode = memo(function BaseNode({
     <NodeContext node={node}>
       <NodeContext.Node
         className={isSelected ? 'is-dragging' : ''}
-        onMouseDown={handleNodeMouseDown}
+        onPointerDown={handleNodePointerDown}
       >
         <Input className="w-20" type="number" value={number} onChange={handleChange} />
       </NodeContext.Node>
