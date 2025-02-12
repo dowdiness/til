@@ -1,6 +1,7 @@
+import { temporalEdgeAtom } from '@/NodeEditor/temporalEdgeAtom'
 import type { NodeSnap } from '@/NodeEditor/types'
-import { useTemporalEdge } from '@/NodeEditor/useTemporalEdge'
 import { cn } from '@/lib/utils'
+import { useAtomValue } from 'jotai'
 import { createContext, useCallback, useContext } from 'react'
 
 const defaultNode: NodeSnap = {
@@ -39,7 +40,7 @@ type NodeConnectorProps = React.ComponentProps<'div'> & {
 }
 
 function NodeConnector({ onConnectStart, onConnectEnd, ...rest }: NodeConnectorProps) {
-  const [temporalEdge] = useTemporalEdge()
+  const temporalEdge = useAtomValue(temporalEdgeAtom)
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       e.stopPropagation()

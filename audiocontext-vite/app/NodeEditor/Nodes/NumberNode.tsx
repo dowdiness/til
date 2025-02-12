@@ -4,7 +4,6 @@ import { memo, useState } from 'react'
 import { editorProxy } from '../store.ts'
 import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '../types.ts'
 import { useNode } from './useNode.ts'
-import { useSelectedNodeId } from './useSelectedNodeId.ts'
 
 type NodeElementProps = {
   node: NodeSnap
@@ -21,14 +20,12 @@ export const NumberNode = memo(function BaseNode({
   onConnectEnd,
 }: NodeElementProps) {
   const [number, setNumber] = useState(node.args[0] ?? 10)
-  const { handleNodePointerDown, handleConnectStart, handleConnectEnd } = useNode({
+  const { isSelected, handleNodePointerDown, handleConnectStart, handleConnectEnd } = useNode({
     node,
     onNodeSelect,
     onConnectStart,
     onConnectEnd,
   })
-  const [selectedNodeId] = useSelectedNodeId()
-  const isSelected = node.id === selectedNodeId
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNumber(Number(e.target.value))

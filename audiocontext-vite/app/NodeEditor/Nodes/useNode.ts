@@ -1,9 +1,9 @@
 import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '@/NodeEditor/types'
+import { useAtom } from 'jotai'
 import { useCallback } from 'react'
 import { editorProxy } from '../store'
-import { boardElement } from '../useBoardRef'
-import { useTemporalEdge } from '../useTemporalEdge'
-import { useSelectedNodeId } from './useSelectedNodeId'
+import { containerElement } from '../useContainerRef'
+import { selectedNodeIdAtom } from './selectedNodeIdAtom'
 
 type UseNodeProps = {
   node: NodeSnap
@@ -12,18 +12,20 @@ type UseNodeProps = {
   onConnectEnd: (edge: NewEdgeEnd) => void
 }
 
-export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: UseNodeProps) {
-  const [, setSelectedNodeId] = useSelectedNodeId()
-  const [, setTemporalEdge] = useTemporalEdge()
+const calculatePosition = (rect: DOMRect, hasOffset: boolean) => {
+  const containerRect = containerElement.getBoundingClientRect()
+  const offset = hasOffset ? 0 : rect.height
+  // HACK: This is a hack to fix the border offset
+  const borderPX = 1
+  return {
+    x: rect.x + rect.width / 2 - containerRect.x - borderPX,
+    y: rect.y + offset - containerRect.y - borderPX,
+  }
+}
 
-  const handleNodeSelect = useCallback(
-    (id: NodeID) => {
-      setSelectedNodeId(id)
-      setTemporalEdge(null)
-      onNodeSelect?.(id)
-    },
-    [setSelectedNodeId, setTemporalEdge, onNodeSelect],
-  )
+export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: UseNodeProps) {
+  const [selectedNodeId, setSelectedNodeId] = useAtom(selectedNodeIdAtom)
+  const isSelected = node.id === selectedNodeId
 
   const handleNodePointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -31,21 +33,11 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
       if (e.target instanceof HTMLElement) {
         e.target.setPointerCapture(e.pointerId)
       }
-      handleNodeSelect(node.id)
+      setSelectedNodeId(node.id)
+      onNodeSelect?.(node.id)
     },
-    [node.id, handleNodeSelect],
+    [node.id, setSelectedNodeId, onNodeSelect],
   )
-
-  const calculatePosition = useCallback((rect: DOMRect, hasOffset: boolean) => {
-    const boardRect = boardElement.getBoundingClientRect()
-    const offset = hasOffset ? 0 : rect.height
-    // HACK: This is a hack to fix the border offset
-    const borderPX = 1
-    return {
-      x: rect.x + rect.width / 2 - boardRect.x - borderPX,
-      y: rect.y + offset - boardRect.y - borderPX,
-    }
-  }, [])
 
   const handleConnectStart = useCallback(
     (e: React.PointerEvent, placement: 'Top' | 'Bottom') => {
@@ -58,14 +50,17 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
         placement === 'Top',
       )
 
-      onConnectStart({
+      console.log(position)
+      const newEdge = {
         id: `edge-${crypto.randomUUID()}`,
         fromId: node.id,
         from: position,
         to: position,
-      })
+      } as const
+
+      onConnectStart(newEdge)
     },
-    [node.id, onConnectStart, calculatePosition],
+    [node.id, onConnectStart],
   )
 
   const handleConnectEnd = useCallback(
@@ -73,16 +68,13 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
       e.stopPropagation()
       if (e.target instanceof HTMLElement) {
         e.target.releasePointerCapture(e.pointerId)
+        const position = calculatePosition(e.target.getBoundingClientRect(), placement === 'Top')
+        onConnectEnd({ toId: node.id, to: position, handlePosition: index })
       }
-      const position = calculatePosition(
-        (e.target as HTMLElement).getBoundingClientRect(),
-        placement === 'Top',
-      )
-      onConnectEnd({ toId: node.id, to: position, handlePosition: index })
       editorProxy.updateNodeIns(node.id, node.id, index)
     },
-    [node.id, onConnectEnd, calculatePosition],
+    [node.id, onConnectEnd],
   )
 
-  return { handleNodePointerDown, handleConnectStart, handleConnectEnd }
+  return { isSelected, handleNodePointerDown, handleConnectStart, handleConnectEnd }
 }

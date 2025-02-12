@@ -2,7 +2,6 @@ import { NodeContext } from '@/components/ui/NodeUI.tsx'
 import { memo } from 'react'
 import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '../types.ts'
 import { useNode } from './useNode.ts'
-import { useSelectedNodeId } from './useSelectedNodeId.ts'
 
 type NodeElementProps = {
   node: NodeSnap
@@ -17,14 +16,12 @@ export const BaseNode = memo(function BaseNode({
   onConnectStart,
   onConnectEnd,
 }: NodeElementProps) {
-  const { handleNodePointerDown, handleConnectStart, handleConnectEnd } = useNode({
+  const { isSelected, handleNodePointerDown, handleConnectStart, handleConnectEnd } = useNode({
     node,
     onNodeSelect,
     onConnectStart,
     onConnectEnd,
   })
-  const [selectedNodeId] = useSelectedNodeId()
-  const isSelected = node.id === selectedNodeId
 
   return (
     <NodeContext node={node}>

@@ -1,8 +1,7 @@
-import { memo, useCallback, useEffect } from 'react'
-import { editorProxy } from '../store.ts'
+import { memo } from 'react'
 import type { UsableEdgeStates } from '../types.ts'
 import './baseEdge.css'
-import { useSelectedEdgeId } from './useSelectedEdgeId.ts'
+import { useEdge } from './useEdge.ts'
 
 // BaseEdge Component
 type BaseEdgeProps = {
@@ -11,35 +10,7 @@ type BaseEdgeProps = {
 }
 
 export const BaseEdge = memo(function BaseEdge({ edge, onSelect }: BaseEdgeProps) {
-  const [selectedEdgeId, setSelectedEdgeId] = useSelectedEdgeId()
-  const isSelected = edge.id === selectedEdgeId
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      // If you have a selected Edge, you can delete it by to type Backspace.
-      if (isSelected && e.key === 'Backspace') {
-        editorProxy.deleteEdgeById(edge.id)
-      }
-    },
-    [edge.id, isSelected],
-  )
-
-  const handleClick = useCallback(() => {
-    setSelectedEdgeId(edge.id)
-    if (onSelect) {
-      onSelect(edge.id)
-    }
-  }, [onSelect, edge.id, setSelectedEdgeId])
-
-  useEffect(() => {
-    if (isSelected) {
-      window.addEventListener('keydown', handleKeyDown)
-    } else {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isSelected, handleKeyDown])
+  const { isSelected, handleClick } = useEdge(edge, onSelect)
 
   return (
     <svg className="svg" width="100%" height="100%" preserveAspectRatio="none" aria-hidden="true">

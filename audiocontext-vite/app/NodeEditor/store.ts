@@ -1,5 +1,6 @@
 import { LangNode, lib } from '@/CodeEditor/graph-language'
 import { langProxy } from '@/CodeEditor/useLang'
+import type { Position } from '@/NodeEditor/types'
 import { mutableFilter } from '@/lib/mutable'
 import { proxy, snapshot } from 'valtio'
 import { devtools, watch } from 'valtio/utils'
@@ -75,15 +76,21 @@ export const edgesProxy = proxy<EdgeState[]>([
 type AppState = {
   nodes: NodeState[]
   edges: EdgeState[]
+  deleteNodeById: (id: NodeID) => void
   deleteEdgeById: (id: EdgeID) => void
   getNodeById: (id: NodeID) => NodeState | undefined
   updateNodeArgs: (id: NodeID, args: number[]) => void
   updateNodeIns: (toId: NodeID, fromId: NodeID, handlePosition: number) => void
+  updateNodes: (selectedNode: NodeState, movement: Position) => void
+  updateEdges: (selectedNode: NodeState, movement: Position) => void
 }
 
 export const editorProxy = proxy<AppState>({
   nodes: nodesProxy,
   edges: edgesProxy,
+  deleteNodeById: (id) => {
+    mutableFilter(nodesProxy, (node) => node.id !== id)
+  },
   deleteEdgeById: (id) => {
     mutableFilter(edgesProxy, (edge) => edge.id !== id)
   },
@@ -100,6 +107,46 @@ export const editorProxy = proxy<AppState>({
     const node = editorProxy.getNodeById(toId)
     if (node) {
       node.ins[handlePosition] = fromId
+    }
+  },
+  updateNodes: (selectedNode: NodeState, movement: Position) => {
+    const { x, y } = movement
+    for (let i = 0; i < nodesProxy.length; i++) {
+      const node = nodesProxy[i]
+      nodesProxy[i] =
+        selectedNode.id === node.id
+          ? {
+              ...node,
+              position: {
+                x: node.position.x + x,
+                y: node.position.y + y,
+              },
+            }
+          : node
+    }
+  },
+  updateEdges: (selectedNode: NodeState, movement: Position) => {
+    const { x, y } = movement
+    for (let i = 0; i < edgesProxy.length; i++) {
+      const edge = edgesProxy[i]
+      edgesProxy[i] =
+        selectedNode.id === edge.fromId
+          ? {
+              ...edge,
+              from: {
+                x: edge.from.x + x,
+                y: edge.from.y + y,
+              },
+            }
+          : selectedNode.id === edge.toId
+            ? {
+                ...edge,
+                to: {
+                  x: edge.to.x + x,
+                  y: edge.to.y + y,
+                },
+              }
+            : edge
     }
   },
 })

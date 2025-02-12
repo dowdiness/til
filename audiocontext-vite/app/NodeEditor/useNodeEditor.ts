@@ -1,34 +1,14 @@
-import { useTemporalEdge } from '@/NodeEditor/useTemporalEdge'
-import { createElement, useCallback } from 'react'
-import { BaseEdge } from './Edges/BaseEdge'
-import { useSelectedNodeId } from './Nodes/useSelectedNodeId'
+import { useConnect } from '@/NodeEditor/useConnect'
+import { useAtom } from 'jotai'
+import { useCallback } from 'react'
+import { selectedNodeIdAtom } from './Nodes/selectedNodeIdAtom'
 import { editorProxy } from './store'
-import type { NewEdgeEnd, NewEdgeStart } from './types'
-import { boardElement } from './useBoardRef'
 
 export const useNodeEditor = () => {
-  const [selectedNodeId, setSelectedNodeId] = useSelectedNodeId()
-  const [temporalEdge, setTemporalEdge] = useTemporalEdge()
-  const hasTemporalEdge = temporalEdge !== null
+  const [selectedNodeId, setSelectedNodeId] = useAtom(selectedNodeIdAtom)
+  const { setTemporalEdge, handleUpdateTemporalEdgePosition } = useConnect()
 
-  const handleConnectStart = useCallback(
-    (edge: NewEdgeStart) => {
-      setTemporalEdge(edge)
-    },
-    [setTemporalEdge],
-  )
-
-  const handleConnectEnd = useCallback(
-    (edge: NewEdgeEnd) => {
-      if (temporalEdge) {
-        editorProxy.edges.push({ ...temporalEdge, ...edge })
-        setTemporalEdge(null)
-      }
-    },
-    [temporalEdge, setTemporalEdge],
-  )
-
-  const handlePointerDownBoard = useCallback(
+  const handlePointerDownContainer = useCallback(
     (e: React.PointerEvent) => {
       setTemporalEdge(null)
       if (e.target instanceof HTMLElement) {
@@ -38,7 +18,7 @@ export const useNodeEditor = () => {
     [setTemporalEdge],
   )
 
-  const handlePointerUpBoard = useCallback(
+  const handlePointerUpContainer = useCallback(
     (e: React.PointerEvent) => {
       setSelectedNodeId(null)
       if (e.target instanceof HTMLElement) {
@@ -48,77 +28,28 @@ export const useNodeEditor = () => {
     [setSelectedNodeId],
   )
 
-  const handlePointerMoveBoard = useCallback(
+  const handlePointerMoveContainer = useCallback(
     (e: React.PointerEvent) => {
+      // Update temporal edge position
+      handleUpdateTemporalEdgePosition({ x: e.clientX, y: e.clientY })
+      // Update objects position if selected node exists
       if (selectedNodeId) {
-        const { nodes, edges } = editorProxy
+        const { nodes } = editorProxy
         const selectedNode = nodes.find((node) => node.id === selectedNodeId)
+        // Skip update if selected Node is not found
         if (!selectedNode) return
-
-        // Calculate movement based on pointer movement
-        const movementX = e.movementX
-        const movementY = e.movementY
-
         // Update nodes position
-        nodes.forEach((node, i) => {
-          nodes[i] =
-            selectedNode.id === node.id
-              ? {
-                  ...node,
-                  position: {
-                    x: node.position.x + movementX,
-                    y: node.position.y + movementY,
-                  },
-                }
-              : node
-        })
-
+        editorProxy.updateNodes(selectedNode, { x: e.movementX, y: e.movementY })
         // Update edges position
-        edges.forEach((edge, i) => {
-          edges[i] =
-            selectedNode.id === edge.fromId
-              ? {
-                  ...edge,
-                  from: {
-                    x: edge.from.x + movementX,
-                    y: edge.from.y + movementY,
-                  },
-                }
-              : selectedNode.id === edge.toId
-                ? {
-                    ...edge,
-                    to: {
-                      x: edge.to.x + movementX,
-                      y: edge.to.y + movementY,
-                    },
-                  }
-                : edge
-        })
-      }
-
-      if (temporalEdge) {
-        const boardRect = boardElement.getBoundingClientRect()
-        setTemporalEdge({
-          ...temporalEdge,
-          to: {
-            x: e.clientX - boardRect.x,
-            y: e.clientY - boardRect.y,
-          },
-        })
+        editorProxy.updateEdges(selectedNode, { x: e.movementX, y: e.movementY })
       }
     },
-    [selectedNodeId, temporalEdge, setTemporalEdge],
+    [selectedNodeId, handleUpdateTemporalEdgePosition],
   )
 
-  const EdgeComp = temporalEdge && createElement(BaseEdge, { edge: temporalEdge })
-
   return {
-    hasTemporalEdge,
-    handlePointerDownBoard,
-    handlePointerUpBoard,
-    handlePointerMoveBoard,
-    handleConnectStart,
-    handleConnectEnd,
-    EdgeComp,
+    handlePointerDownContainer,
+    handlePointerUpContainer,
+    handlePointerMoveContainer,
   }
 }

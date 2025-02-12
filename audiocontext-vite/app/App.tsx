@@ -1,6 +1,6 @@
 import { CodeEditor } from '@/CodeEditor'
 import { funcs } from '@/CodeEditor/graph-language'
-import { Board } from '@/NodeEditor/Board'
+import { NodeEditor } from '@/NodeEditor'
 import { Divider } from '@/components/ui/Divider'
 
 function App() {
@@ -8,7 +8,7 @@ function App() {
     <main className="container flex flex-col items-start my-8 space-y-4">
       <h1 className="text-3xl">Graph Language</h1>
       <Divider />
-      <Board />
+      <NodeEditor />
       <Divider />
       <h2 className="text-xl">Functions</h2>
       <ul className="flex space-x-2">
