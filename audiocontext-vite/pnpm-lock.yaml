@@ -38,6 +38,9 @@ importers:
       jotai:
         specifier: ^2.11.3
         version: 2.11.3(@types/react@19.0.7)(react@19.0.0)
+      jotai-valtio:
+        specifier: ^0.6.0
+        version: 0.6.0(jotai@2.11.3(@types/react@19.0.7)(react@19.0.0))(valtio@2.1.2(@types/react@19.0.7)(react@19.0.0))
       lucide-react:
         specifier: ^0.473.0
         version: 0.473.0(react@19.0.0)
@@ -1220,6 +1223,12 @@ packages:
   jiti@1.21.7:
     resolution: {integrity: sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==}
     hasBin: true
+
+  jotai-valtio@0.6.0:
+    resolution: {integrity: sha512-ohn1On9O8dUZRfl04BFdJk1JcFjYmjLV8UZWNNypxpyzrx0nKKqbnu7mvAZjE8430obnqYQX1KRb+4CluFVPeA==}
+    peerDependencies:
+      jotai: '>=2.0.0'
+      valtio: '>=2.0.0'
 
   jotai@2.11.3:
     resolution: {integrity: sha512-B/PsewAQ0UOS5e2+TTWegUPQ3SCLPCjPY24LYUjfn2EorGlluTA2dFjVLgF1+xHLjK9Jit3y5mKHyMG3Xq/GZg==}
@@ -2870,6 +2879,11 @@ snapshots:
       '@pkgjs/parseargs': 0.11.0
 
   jiti@1.21.7: {}
+
+  jotai-valtio@0.6.0(jotai@2.11.3(@types/react@19.0.7)(react@19.0.0))(valtio@2.1.2(@types/react@19.0.7)(react@19.0.0)):
+    dependencies:
+      jotai: 2.11.3(@types/react@19.0.7)(react@19.0.0)
+      valtio: 2.1.2(@types/react@19.0.7)(react@19.0.0)
 
   jotai@2.11.3(@types/react@19.0.7)(react@19.0.0):
     optionalDependencies:

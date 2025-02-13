@@ -2,6 +2,7 @@ import { LangNode, lib } from '@/CodeEditor/graph-language'
 import { langProxy } from '@/CodeEditor/useLang'
 import type { Position } from '@/NodeEditor/types'
 import { mutableFilter } from '@/lib/mutable'
+import { atomWithProxy } from 'jotai-valtio'
 import { proxy, snapshot } from 'valtio'
 import { devtools, watch } from 'valtio/utils'
 import type { EdgeID, EdgeSnap, EdgeState, NodeID, NodeSnap, NodeState } from './types'
@@ -150,6 +151,8 @@ export const editorProxy = proxy<AppState>({
     }
   },
 })
+
+export const editorAtom = atomWithProxy(editorProxy)
 
 devtools(editorProxy)
 // subscribe(editorProxy, () => {
