@@ -1,12 +1,13 @@
-import { useConnect } from '@/NodeEditor/useConnect'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { useCallback } from 'react'
+import { temporalEdgeAtom, updateTemporalEdgePositionAtom } from './Edges/temporalEdgeAtom'
 import { selectedNodeIdAtom } from './Nodes/selectedNodeIdAtom'
 import { editorProxy } from './store'
 
 export const useNodeEditor = () => {
-  const [selectedNodeId, setSelectedNodeId] = useAtom(selectedNodeIdAtom)
-  const { setTemporalEdge, handleUpdateTemporalEdgePosition } = useConnect()
+  const [selectedNodeId] = useAtom(selectedNodeIdAtom)
+  const setTemporalEdge = useSetAtom(temporalEdgeAtom)
+  const updateTemporalEdgePosition = useSetAtom(updateTemporalEdgePositionAtom)
 
   const handlePointerDownContainer = useCallback(
     (e: React.PointerEvent) => {
@@ -18,20 +19,16 @@ export const useNodeEditor = () => {
     [setTemporalEdge],
   )
 
-  const handlePointerUpContainer = useCallback(
-    (e: React.PointerEvent) => {
-      setSelectedNodeId(null)
-      if (e.target instanceof HTMLElement) {
-        e.target.releasePointerCapture(e.pointerId)
-      }
-    },
-    [setSelectedNodeId],
-  )
+  const handlePointerUpContainer = useCallback((e: React.PointerEvent) => {
+    if (e.target instanceof HTMLElement) {
+      e.target.releasePointerCapture(e.pointerId)
+    }
+  }, [])
 
   const handlePointerMoveContainer = useCallback(
     (e: React.PointerEvent) => {
       // Update temporal edge position
-      handleUpdateTemporalEdgePosition({ x: e.clientX, y: e.clientY })
+      updateTemporalEdgePosition({ x: e.clientX, y: e.clientY })
       // Update objects position if selected node exists
       if (selectedNodeId) {
         const { nodes } = editorProxy
@@ -44,7 +41,7 @@ export const useNodeEditor = () => {
         editorProxy.updateEdges(selectedNode, { x: e.movementX, y: e.movementY })
       }
     },
-    [selectedNodeId, handleUpdateTemporalEdgePosition],
+    [selectedNodeId, updateTemporalEdgePosition],
   )
 
   return {

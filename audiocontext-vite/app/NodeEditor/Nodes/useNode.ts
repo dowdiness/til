@@ -1,6 +1,6 @@
 import type { NewEdgeEnd, NewEdgeStart, NodeID, NodeSnap } from '@/NodeEditor/types'
 import { useAtom } from 'jotai'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { editorProxy } from '../store'
 import { containerElement } from '../useContainerRef'
 import { selectedNodeIdAtom } from './selectedNodeIdAtom'
@@ -33,10 +33,14 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
       if (e.target instanceof HTMLElement) {
         e.target.setPointerCapture(e.pointerId)
       }
-      setSelectedNodeId(node.id)
+      if (selectedNodeId) {
+        setSelectedNodeId(null)
+      } else {
+        setSelectedNodeId(node.id)
+      }
       onNodeSelect?.(node.id)
     },
-    [node.id, setSelectedNodeId, onNodeSelect],
+    [node.id, selectedNodeId, setSelectedNodeId, onNodeSelect],
   )
 
   const handleConnectStart = useCallback(
@@ -50,7 +54,6 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
         placement === 'Top',
       )
 
-      console.log(position)
       const newEdge = {
         id: `edge-${crypto.randomUUID()}`,
         fromId: node.id,
@@ -75,6 +78,23 @@ export function useNode({ node, onNodeSelect, onConnectStart, onConnectEnd }: Us
     },
     [node.id, onConnectEnd],
   )
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isSelected && e.key === 'Backspace') {
+        editorProxy.deleteNodeById(node.id)
+      }
+    }
+
+    if (isSelected) {
+      window.addEventListener('keydown', handleKeyDown)
+    } else {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isSelected, node.id])
 
   return { isSelected, handleNodePointerDown, handleConnectStart, handleConnectEnd }
 }

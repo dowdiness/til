@@ -1,29 +1,11 @@
-import type { NewEdgeEnd, NewEdgeStart, Position } from '@/NodeEditor/types'
+import type { NewEdgeEnd, NewEdgeStart } from '@/NodeEditor/types'
 import { useAtom } from 'jotai'
-import { createElement, useCallback } from 'react'
-import { BaseEdge } from './Edges/BaseEdge'
+import { useCallback } from 'react'
+import { temporalEdgeAtom } from './Edges/temporalEdgeAtom'
 import { editorProxy } from './store'
-import { temporalEdgeAtom } from './temporalEdgeAtom'
-import { containerElement } from './useContainerRef'
 
 export const useConnect = () => {
   const [temporalEdge, setTemporalEdge] = useAtom(temporalEdgeAtom)
-
-  const handleUpdateTemporalEdgePosition = useCallback(
-    ({ x, y }: Position) => {
-      if (temporalEdge) {
-        const containerRect = containerElement.getBoundingClientRect()
-        setTemporalEdge({
-          ...temporalEdge,
-          to: {
-            x: x - containerRect.x,
-            y: y - containerRect.y,
-          },
-        })
-      }
-    },
-    [temporalEdge, setTemporalEdge],
-  )
 
   const handleConnectStart = useCallback(
     (edge: NewEdgeStart) => {
@@ -42,13 +24,8 @@ export const useConnect = () => {
     [temporalEdge, setTemporalEdge],
   )
 
-  const EdgeComp = temporalEdge && createElement(BaseEdge, { edge: temporalEdge })
   return {
-    temporalEdge,
-    setTemporalEdge,
-    handleUpdateTemporalEdgePosition,
     handleConnectStart,
     handleConnectEnd,
-    EdgeComp,
   } as const
 }

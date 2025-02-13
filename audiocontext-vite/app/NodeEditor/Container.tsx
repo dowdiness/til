@@ -1,13 +1,12 @@
 import { NodeContainer } from '@/NodeEditor/Nodes/NodeContainer'
 import { EdgeContainer } from './Edges/EdgeContainer'
+import { TemporalEdge } from './Edges/TemporalEdge'
 import { Panel } from './Panel'
-import { useConnect } from './useConnect'
 import { useContainerRef } from './useContainerRef'
 import { useNodeEditor } from './useNodeEditor'
 
 export function Container({ children }: React.ComponentProps<'article'>) {
   const containerRef = useContainerRef()
-  const { handleConnectStart, handleConnectEnd, EdgeComp } = useConnect()
   const { handlePointerDownContainer, handlePointerUpContainer, handlePointerMoveContainer } =
     useNodeEditor()
 
@@ -22,8 +21,8 @@ export function Container({ children }: React.ComponentProps<'article'>) {
       {children}
       <Panel />
       <EdgeContainer />
-      <NodeContainer onConnectStart={handleConnectStart} onConnectEnd={handleConnectEnd} />
-      {EdgeComp}
+      <NodeContainer />
+      <TemporalEdge />
     </article>
   )
 }

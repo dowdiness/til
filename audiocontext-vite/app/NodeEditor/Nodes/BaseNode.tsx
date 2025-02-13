@@ -35,7 +35,7 @@ export const BaseNode = memo(function BaseNode({
         )}
       />
       <NodeContext.Node
-        className={isSelected ? 'is-dragging' : ''}
+        className={isSelected ? 'is-dragging border-pink-500' : ''}
         onPointerDown={handleNodePointerDown}
       >
         {node.type}

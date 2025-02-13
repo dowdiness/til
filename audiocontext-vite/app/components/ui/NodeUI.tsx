@@ -1,4 +1,4 @@
-import { temporalEdgeAtom } from '@/NodeEditor/temporalEdgeAtom'
+import { temporalEdgeAtom } from '@/NodeEditor/Edges/temporalEdgeAtom'
 import type { NodeSnap } from '@/NodeEditor/types'
 import { cn } from '@/lib/utils'
 import { useAtomValue } from 'jotai'
