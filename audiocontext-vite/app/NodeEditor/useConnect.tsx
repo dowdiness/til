@@ -1,8 +1,8 @@
 import type { NewEdgeEnd, NewEdgeStart } from '@/NodeEditor/types'
+import { edgesProxy } from '@/core'
 import { useAtom } from 'jotai'
 import { useCallback } from 'react'
 import { temporalEdgeAtom } from './Edges/temporalEdgeAtom'
-import { editorProxy } from './store'
 
 export const useConnect = () => {
   const [temporalEdge, setTemporalEdge] = useAtom(temporalEdgeAtom)
@@ -17,7 +17,7 @@ export const useConnect = () => {
   const handleConnectEnd = useCallback(
     (edge: NewEdgeEnd) => {
       if (temporalEdge) {
-        editorProxy.edges.push({ ...temporalEdge, ...edge })
+        edgesProxy.push({ ...temporalEdge, ...edge })
         setTemporalEdge(null)
       }
     },

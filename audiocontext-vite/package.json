@@ -37,6 +37,7 @@
     "vitest-browser-react": "^0.0.4"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^1.1.4",
     "@kabelsalat/core": "^0.2.1",
     "@kabelsalat/lib": "^0.2.1",
     "@kabelsalat/transpiler": "^0.2.0",

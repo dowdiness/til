@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
+import { nodesProxy } from '@/core'
 import { useCallback } from 'react'
-import { editorProxy } from './store.ts'
 import type { NodeTypes } from './types.ts'
 
 export type AddNodeProps = {
@@ -14,7 +14,7 @@ export type AddNodeProps = {
 export function AddNode({ type, args, ins }: AddNodeProps) {
   const nonNullArgs = args.map((arg) => (arg === null ? 0 : arg))
   const handleClick = useCallback(() => {
-    editorProxy.nodes.push({
+    nodesProxy.push({
       id: `node-${crypto.randomUUID()}`,
       type,
       args: nonNullArgs,

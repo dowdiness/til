@@ -1,5 +1,5 @@
+import { nodesProxy } from '@/core'
 import { useSnapshot } from 'valtio'
-import { nodesProxy } from '../store'
 import type { NewEdgeEnd, NewEdgeStart, NodeID } from '../types'
 import { useConnect } from '../useConnect'
 import { BaseNode } from './BaseNode'
