@@ -1,0 +1,139 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "dowdiness/crdt/partial-iso"
+
+// Values
+pub fn add_iso() -> Iso[(Expr, Expr), Expr]
+
+pub fn[A, B, C] associate() -> Iso[(A, (B, C)), ((A, B), C)]
+
+pub fn char_(Char) -> Parser[Unit]
+
+pub fn[A, B] commute() -> Iso[(A, B), (B, A)]
+
+pub fn[A, B, C] compose(Iso[B, C], Iso[A, B]) -> Iso[A, C]
+
+pub fn digit() -> Parser[Char]
+
+pub fn expr_parser() -> Parser[Expr]
+
+pub fn expr_printer() -> Printer[Expr]
+
+pub fn integer() -> Parser[Int]
+
+pub fn lit_iso() -> Iso[Int, Expr]
+
+pub fn[A : Eq] literal(A) -> Iso[Unit, A]
+
+pub fn[A] many(Parser[A]) -> Parser[Array[A]]
+
+pub fn[A] many1(Parser[A]) -> Parser[Array[A]]
+
+pub fn mul_iso() -> Iso[(Expr, Expr), Expr]
+
+pub fn[A, B, C] op_shl(Iso[B, C], Iso[A, B]) -> Iso[A, C]
+
+pub fn print_char(Char) -> Printer[Unit]
+
+pub fn print_digit() -> Printer[Char]
+
+pub fn print_integer() -> Printer[Int]
+
+pub fn[A] print_many(Printer[A]) -> Printer[Array[A]]
+
+pub fn[A] print_many1(Printer[A]) -> Printer[Array[A]]
+
+pub fn print_text(String) -> Printer[Unit]
+
+pub fn[A, B, C, D] product(Iso[A, B], Iso[C, D]) -> Iso[(A, C), (B, D)]
+
+pub fn[A] subset((A) -> Bool) -> Iso[A, A]
+
+pub fn syntax_char(Char) -> Syntax[Unit]
+
+pub fn syntax_digit() -> Syntax[Char]
+
+pub fn syntax_integer() -> Syntax[Int]
+
+pub fn[A] syntax_many(Syntax[A]) -> Syntax[Array[A]]
+
+pub fn[A] syntax_many1(Syntax[A]) -> Syntax[Array[A]]
+
+pub fn syntax_text(String) -> Syntax[Unit]
+
+pub fn text(String) -> Parser[Unit]
+
+pub fn[A] unit_left() -> Iso[A, (Unit, A)]
+
+pub fn[A] unit_right() -> Iso[A, (A, Unit)]
+
+// Errors
+
+// Types and methods
+pub enum Expr {
+  Lit(Int)
+  Add(Expr, Expr)
+  Mul(Expr, Expr)
+}
+pub impl Show for Expr
+
+pub struct Iso[A, B] {
+  apply : (A) -> B?
+  unapply : (B) -> A?
+}
+pub fn[A, B] Iso::apply(Self[A, B], A) -> B?
+pub fn[A] Iso::id() -> Self[A, A]
+pub fn[A, B] Iso::inverse(Self[A, B]) -> Self[B, A]
+pub fn[A, B] Iso::new((A) -> B?, (B) -> A?) -> Self[A, B]
+pub fn[A, B] Iso::unapply(Self[A, B], B) -> A?
+
+pub struct Parser[A] {
+  run : (String) -> (A, String)?
+}
+pub fn[A] Parser::alt(Self[A], Self[A]) -> Self[A]
+pub fn[A] Parser::delayed(() -> Self[A]) -> Self[A]
+pub fn[A] Parser::empty() -> Self[A]
+pub fn[A, B] Parser::iso_map(Self[A], Iso[A, B]) -> Self[B]
+pub fn[A] Parser::new((String) -> (A, String)?) -> Self[A]
+pub fn[A] Parser::parse(Self[A], String) -> A?
+pub fn[A] Parser::parse_partial(Self[A], String) -> (A, String)?
+pub fn[A, B] Parser::product(Self[A], Self[B]) -> Self[(A, B)]
+pub fn[A] Parser::pure(A) -> Self[A]
+pub fn[B] Parser::skip_left(Self[Unit], Self[B]) -> Self[B]
+pub fn[A] Parser::skip_right(Self[A], Self[Unit]) -> Self[A]
+pub fn Parser::token() -> Self[Char]
+
+pub struct Printer[A] {
+  run : (A) -> String?
+}
+pub fn[A] Printer::alt(Self[A], Self[A]) -> Self[A]
+pub fn[A] Printer::empty() -> Self[A]
+pub fn[A, B] Printer::iso_map(Self[A], Iso[A, B]) -> Self[B]
+pub fn[A] Printer::new((A) -> String?) -> Self[A]
+pub fn[A] Printer::print(Self[A], A) -> String?
+pub fn[A, B] Printer::product(Self[A], Self[B]) -> Self[(A, B)]
+pub fn[A] Printer::pure(A) -> Self[A]
+pub fn[B] Printer::skip_left(Self[Unit], Self[B]) -> Self[B]
+pub fn[A] Printer::skip_right(Self[A], Self[Unit]) -> Self[A]
+pub fn Printer::token() -> Self[Char]
+
+pub struct Syntax[A] {
+  parser : Parser[A]
+  printer : Printer[A]
+}
+pub fn[A] Syntax::alt(Self[A], Self[A]) -> Self[A]
+pub fn[A] Syntax::delayed(() -> Self[A]) -> Self[A]
+pub fn[A] Syntax::empty() -> Self[A]
+pub fn[A, B] Syntax::iso_map(Self[A], Iso[A, B]) -> Self[B]
+pub fn[A] Syntax::new(Parser[A], Printer[A]) -> Self[A]
+pub fn[A] Syntax::parse(Self[A], String) -> A?
+pub fn[A] Syntax::print(Self[A], A) -> String?
+pub fn[A, B] Syntax::product(Self[A], Self[B]) -> Self[(A, B)]
+pub fn[A] Syntax::pure(A) -> Self[A]
+pub fn[B] Syntax::skip_left(Self[Unit], Self[B]) -> Self[B]
+pub fn[A] Syntax::skip_right(Self[A], Self[Unit]) -> Self[A]
+pub fn Syntax::token() -> Self[Char]
+
+// Type aliases
+
+// Traits
+
