@@ -5,7 +5,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { router, useForm } from "@inertiajs/react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useEffectEvent, useState, type FormEvent } from "react";
 import type { PostInput } from "../../domain/post";
 import { isPostStatus, validatePostInput, type FieldErrors } from "../../domain/post-validation";
 
@@ -47,15 +47,16 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
   const [dismissedServerErrors, setDismissedServerErrors] = useState<Partial<Record<PostField, string>>>({});
   const validation = validatePostInput(form.data);
   const clientErrors = validation.ok ? {} : validation.errors;
+  const hasUnsavedChanges = useEffectEvent(() => form.isDirty);
 
   useEffect(() => {
     const removeBeforeListener = router.on("before", (event) => {
       const visit = event.detail.visit;
-      if (!form.isDirty || visit.method !== "get" || visit.prefetch) return;
+      if (!hasUnsavedChanges() || visit.method !== "get" || visit.prefetch) return;
       return window.confirm("You have unsaved changes. Leave this page?");
     });
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!form.isDirty) return;
+      if (!hasUnsavedChanges()) return;
       event.preventDefault();
       event.returnValue = "";
     };
@@ -64,7 +65,7 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
       removeBeforeListener();
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [form.isDirty]);
+  }, []);
 
   const touch = (field: PostField) => {
     setTouched((current) => ({ ...current, [field]: true }));

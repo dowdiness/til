@@ -19,9 +19,37 @@ export function isPublicPage(component: string): boolean {
   return component === "Posts/Index" || component === "Posts/Show";
 }
 
+function toInertiaPage(page: PageObject): Page {
+  const scrollProps = page.scrollProps
+    ? Object.fromEntries(
+        Object.entries(page.scrollProps).map(([key, value]) => [
+          key,
+          { ...value, reset: false },
+        ]),
+      )
+    : undefined;
+
+  return {
+    component: page.component,
+    props: { ...page.props, errors: {} },
+    url: page.url,
+    version: page.version,
+    deferredProps: page.deferredProps,
+    initialDeferredProps: page.deferredProps,
+    rescuedProps: [],
+    mergeProps: page.mergeProps,
+    prependProps: page.prependProps,
+    deepMergeProps: page.deepMergeProps,
+    matchPropsOn: page.matchPropsOn,
+    scrollProps,
+    flash: {},
+    rememberedState: {},
+  };
+}
+
 export async function renderPublicPage(page: PageObject): Promise<string> {
   const result = await createInertiaApp({
-    page: page as Page,
+    page: toInertiaPage(page),
     render: renderToString,
     resolve: resolvePublicPage,
     serverHead: true,

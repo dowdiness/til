@@ -74,6 +74,7 @@ describe("Edge Journal integration", () => {
     expect(html).toContain('data-server-rendered="true"');
     expect(html).toContain('"component":"Posts\\/Index"');
     expect(html).toContain("Published notes");
+    expect(html).toContain('role="status" aria-live="polite" aria-atomic="true"');
     expect(html).toContain("Published one");
     expect(html).toContain('<title data-inertia="">Journal</title>');
   });

@@ -10,8 +10,8 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useState,
+  useMemo,
+  useOptimistic,
   type ReactNode,
 } from "react";
 
@@ -23,19 +23,20 @@ const PartialPropsContext = createContext<readonly string[] | undefined>(undefin
 function useNuqsInertiaAdapter(): AdapterInterface {
   const currentUrl = usePage().url;
   const only = useContext(PartialPropsContext);
-  const [searchParams, setSearchParams] = useState(
+  const canonicalSearchParams = useMemo(
     () => new URL(currentUrl, getOrigin()).searchParams,
+    [currentUrl],
   );
-
-  useEffect(() => {
-    setSearchParams(new URL(currentUrl, getOrigin()).searchParams);
-  }, [currentUrl]);
+  const [searchParams, setOptimisticSearchParams] = useOptimistic(
+    canonicalSearchParams,
+    (_current, next: URLSearchParams) => new URLSearchParams(next),
+  );
 
   const updateUrl: UpdateUrlFunction = useCallback(
     (search: URLSearchParams, options: AdapterOptions) => {
       const url = new URL(window.location.href);
       url.search = renderQueryString(search);
-      setSearchParams(url.searchParams);
+      setOptimisticSearchParams(url.searchParams);
 
       if (options.shallow === false) {
         return new Promise<void>((resolve) => {
@@ -58,7 +59,7 @@ function useNuqsInertiaAdapter(): AdapterInterface {
         preserveState: true,
       });
     },
-    [only],
+    [only, setOptimisticSearchParams],
   );
 
   return { searchParams, updateUrl };

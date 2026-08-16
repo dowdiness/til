@@ -36,7 +36,15 @@ export function PublicLedger({ posts, query, isSearching, onClear, onOpenPost }:
           Short observations on software, systems, and making technical work easier to understand.
         </Text>
         <div className="result-summary">
-          <Text type="supporting" color="secondary" as="p" hasTabularNumbers>
+          <Text
+            type="supporting"
+            color="secondary"
+            as="p"
+            hasTabularNumbers
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {posts.total} {posts.total === 1 ? "note" : "notes"}
             {query ? <> matching <q>{query}</q></> : null}
           </Text>
