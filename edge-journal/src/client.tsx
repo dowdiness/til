@@ -2,7 +2,11 @@ import { createInertiaApp, type ResolvedComponent } from "@inertiajs/react";
 import { withApp } from "../app/inertia-app";
 import "./styles.css";
 
-if (import.meta.env.DEV) await import("./astryx-dev.css");
+if (import.meta.env.DEV) {
+  await import("./astryx-dev.css");
+  await import("../app/styles/astryx-overrides.stylex");
+  await import("virtual:stylex:runtime");
+}
 
 type NavigatorCapabilities = Navigator & {
   deviceMemory?: number;

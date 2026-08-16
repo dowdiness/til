@@ -3,6 +3,7 @@ import { Link } from "@astryxdesign/core/Link";
 import { Text } from "@astryxdesign/core/Text";
 import { usePage } from "@inertiajs/react";
 import type { ReactNode } from "react";
+import { astryxOverrides } from "../styles/astryx-overrides.stylex";
 
 export function Layout({
   children,
@@ -19,7 +20,7 @@ export function Layout({
   return (
     <div className="app-shell">
       <header className="site-header">
-        <Link href="/" isStandalone hasUnderline={false} className="brand-link">
+        <Link href="/" isStandalone hasUnderline={false} xstyle={astryxOverrides.brandLink}>
           Edge Journal
         </Link>
         {isAdmin ? (

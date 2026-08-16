@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-15T09:11:52Z",
+  "generatedAt": "2026-08-16T08:53:54Z",
   "title": "Design System: Edge Journal",
   "extensions": {
     "colorMeta": {
@@ -54,11 +54,12 @@
       }
     },
     "typographyMeta": {
-      "body": { "displayName": "Body", "purpose": "Base reading text at 0.9375rem." },
+      "body": { "displayName": "Body", "purpose": "Base reading text at 1rem." },
       "display": { "displayName": "Article Display", "purpose": "Article h1 only; clamp-scaled." },
       "heading": { "displayName": "Page Heading", "purpose": "Page-intro h1, admin headings, form headings." },
-      "reading": { "displayName": "Reading", "purpose": "Introductions and article text at 1rem." },
-      "entry": { "displayName": "Entry", "purpose": "Journal titles and article footer links at 0.875rem." },
+      "lead": { "displayName": "Lead", "purpose": "Introductions and article decks at 1.0625rem." },
+      "reading": { "displayName": "Reading", "purpose": "Long-form article text at 1rem." },
+      "entry": { "displayName": "Entry", "purpose": "Journal titles at 0.9375rem." },
       "label": { "displayName": "Label", "purpose": "Nav, dates, section headings, excerpts, metadata." },
       "supporting": { "displayName": "Supporting", "purpose": "Footer, post-meta, admin entry detail." }
     },
@@ -81,7 +82,7 @@
       "kind": "custom",
       "description": "Card-free index row: title and date share a baseline with a dotted leader between them.",
       "html": "<article class=\"ds-journal-entry\"><div class=\"ds-entry-title-row\"><h3 class=\"ds-entry-title\"><a class=\"ds-story-link\" href=\"#\">A note title</a></h3><span class=\"ds-entry-leader\" aria-hidden=\"true\"></span><time class=\"ds-entry-date\">Jun 15, 2025</time></div><p class=\"ds-entry-excerpt\">Short observation about software or systems.</p></article>",
-      "css": ".ds-journal-entry { padding-block: 0.625rem; } .ds-entry-title-row { display: flex; align-items: baseline; gap: 0.85rem; min-width: 0; } .ds-entry-title { min-width: 0; margin: 0; color: #414141; font-size: 0.875rem; font-weight: 450; line-height: 1.5; font-family: InterVariable, Inter, ui-sans-serif, sans-serif; } .ds-entry-leader { min-width: 1.5rem; flex: 1; border-bottom: 1px dotted #d4d4d4; transform: translateY(-0.18rem); } .ds-entry-date { flex: 0 0 auto; color: #737373; font-size: 0.8125rem; font-variant-numeric: tabular-nums; white-space: nowrap; font-family: InterVariable, Inter, ui-sans-serif, sans-serif; } .ds-story-link { color: inherit; text-decoration: none; } .ds-story-link:hover, .ds-story-link:focus-visible { color: #111111; text-decoration: underline; } .ds-entry-excerpt { max-width: 38rem; margin: 0.15rem 0 0; color: #737373; font-size: 0.8125rem; line-height: 1.55; font-family: InterVariable, Inter, ui-sans-serif, sans-serif; }"
+      "css": ".ds-journal-entry { padding-block: 0.625rem; } .ds-entry-title-row { display: flex; align-items: baseline; gap: 0.85rem; min-width: 0; } .ds-entry-title { min-width: 0; margin: 0; color: #414141; font-size: 0.9375rem; font-weight: 500; line-height: 1.45; font-family: var(--font-family-journal); } .ds-entry-leader { min-width: 1.5rem; flex: 1; border-bottom: 1px dotted #d4d4d4; transform: translateY(-0.18rem); } .ds-entry-date { flex: 0 0 auto; color: #737373; font-size: 0.8125rem; font-variant-numeric: tabular-nums; white-space: nowrap; font-family: var(--font-family-journal); } .ds-story-link { color: inherit; text-decoration: none; } .ds-story-link:hover, .ds-story-link:focus-visible { color: #111111; text-decoration: underline; } .ds-entry-excerpt { max-width: 68ch; margin: 0.2rem 0 0; color: #737373; font-size: 0.8125rem; line-height: 1.55; font-family: var(--font-family-journal); }"
     },
     {
       "name": "Ghost Button",
@@ -89,21 +90,21 @@
       "refersTo": "button-ghost",
       "description": "Borderless text button for search submit and secondary actions.",
       "html": "<button class=\"ds-btn-ghost\">Search</button>",
-      "css": ".ds-btn-ghost { background: transparent; color: #171717; border: none; border-radius: 0.25rem; padding-inline: 0.45rem; font-family: InterVariable, Inter, ui-sans-serif, sans-serif; font-size: 0.8125rem; cursor: pointer; transition: color 0.15s; } .ds-btn-ghost:hover { color: #111111; } .ds-btn-ghost:focus-visible { outline: 1px solid #171717; outline-offset: 3px; }"
+      "css": ".ds-btn-ghost { background: transparent; color: #171717; border: none; border-radius: 0.25rem; padding-inline: 0.45rem; font-family: var(--font-family-journal); font-size: 0.8125rem; cursor: pointer; transition: color 0.15s; } .ds-btn-ghost:hover { color: #111111; } .ds-btn-ghost:focus-visible { outline: 1px solid #171717; outline-offset: 3px; }"
     },
     {
       "name": "Pagination",
       "kind": "custom",
       "description": "Three-column grid with dotted top border for page navigation.",
       "html": "<nav class=\"ds-pagination\"><a class=\"ds-pagination-link\" href=\"#\">Previous</a><span class=\"ds-page-info\">Page 1 of 4</span><a class=\"ds-pagination-link\" href=\"#\">Next</a></nav>",
-      "css": ".ds-pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; margin-top: 3.5rem; padding-top: 1rem; border-top: 1px dotted #d4d4d4; text-align: center; font-family: InterVariable, Inter, ui-sans-serif, sans-serif; } .ds-pagination > :last-child { justify-self: end; } .ds-pagination-link { color: #414141; font-size: 0.8125rem; text-decoration: none; } .ds-pagination-link:hover { text-decoration: underline; color: #171717; } .ds-pagination-link:focus-visible { outline: 1px solid #171717; outline-offset: 3px; } .ds-page-info { color: #737373; font-size: 0.75rem; font-variant-numeric: tabular-nums; }"
+      "css": ".ds-pagination { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; margin-top: 3.5rem; padding-top: 1rem; border-top: 1px dotted #d4d4d4; text-align: center; font-family: var(--font-family-journal); } .ds-pagination > :last-child { justify-self: end; } .ds-pagination-link { color: #414141; font-size: 0.8125rem; text-decoration: none; } .ds-pagination-link:hover { text-decoration: underline; color: #171717; } .ds-pagination-link:focus-visible { outline: 1px solid #171717; outline-offset: 3px; } .ds-page-info { color: #737373; font-size: 0.75rem; font-variant-numeric: tabular-nums; }"
     },
     {
       "name": "Site Header",
       "kind": "nav",
       "description": "Wordmark and two-link nav on a shared baseline with large bottom margin.",
       "html": "<header class=\"ds-site-header\"><a class=\"ds-brand-link\" href=\"/\">Edge Journal</a><nav class=\"ds-site-nav\"><a href=\"/\">Journal</a><a href=\"/admin\">Admin</a></nav></header>",
-      "css": ".ds-site-header { display: flex; align-items: baseline; justify-content: space-between; gap: 2rem; margin-bottom: clamp(3.75rem, 9vw, 5.5rem); font-family: InterVariable, Inter, ui-sans-serif, sans-serif; } .ds-brand-link { color: #171717; font-size: 1.125rem; font-weight: 500; letter-spacing: -0.02em; text-decoration: none; } .ds-site-nav { display: flex; align-items: center; gap: 1.25rem; font-size: 0.8125rem; } .ds-site-nav a { color: #737373; text-decoration: none; } .ds-site-nav a:hover, .ds-site-nav a:focus-visible { color: #414141; }"
+      "css": ".ds-site-header { display: flex; align-items: baseline; justify-content: space-between; gap: 2rem; margin-bottom: clamp(3.75rem, 9vw, 5.5rem); font-family: var(--font-family-journal); } .ds-brand-link { color: #171717; font-size: 1.125rem; font-weight: 500; letter-spacing: -0.01em; text-decoration: none; } .ds-site-nav { display: flex; align-items: center; gap: 1.25rem; font-size: 0.8125rem; } .ds-site-nav a { color: #737373; text-decoration: none; } .ds-site-nav a:hover, .ds-site-nav a:focus-visible { color: #414141; }"
     },
     {
       "name": "Article Divider",
@@ -121,28 +122,9 @@
       "Dotted leaders over borders for structural separation",
       "Graphite on paper — chromatic color reserved for semantic states",
       "Square controls — near-zero border radius everywhere",
-      "One column — 44rem centered, 70ch article body",
+      "One column — 44rem centered, 66ch article body",
       "Immediate response — 44px touch targets, pointer-down feedback, and interruptible visit loading",
       "Forgiving operations — delete is reversible through an inline Undo action"
-    ],
-    "rules": [
-      { "name": "The Mono-Gray Rule", "body": "Navigation and editorial emphasis stay within the gray family; green and red are reserved for publication status and destructive actions.", "section": "colors" },
-      { "name": "The Single-Family Rule", "body": "Editorial and interface copy uses Inter at weights 400–500. Monospace is restricted to slugs and code-like values.", "section": "typography" },
-      { "name": "The Direct-Response Rule", "body": "Every interactive target responds on pointer-down, exposes pending work, and remains at least 44px tall on touch-oriented pointers.", "section": "components" }
-    ],
-    "dos": [
-      "Do keep editorial and interface copy in the Inter family at weights 400–500; reserve monospace for slugs and code-like values.",
-      "Do use dotted leaders for structural separators and solid #8b8b8b for the article divider only.",
-      "Do maintain the 44rem column and 70ch article body as maximum reading widths.",
-      "Do share the same grammar between public and admin surfaces.",
-      "Do use tabular numerals for all dates and page counters."
-    ],
-    "donts": [
-      "Don't add decorative chromatic accents, card backgrounds, shadows, or gradients; color remains reserved for semantic states.",
-      "Don't use Astryx brand assets, illustrations, or marketing-page structure.",
-      "Don't add Tailwind, shadcn/ui, or a second component library.",
-      "Don't introduce dark mode as a user toggle — light theme is hardcoded.",
-      "Don't wrap journal entries in containers — the index is deliberately card-free."
     ]
   }
 }

@@ -1,5 +1,6 @@
 ---
-target: public Journal homepage; Inter must not be used
+target: public Journal homepage
+status: resolved
 total_score: 34
 max_score: 40
 na_heuristics:
@@ -9,6 +10,8 @@ timestamp: 2026-08-15T10-11-58Z
 slug: app-pages-posts-index-tsx
 ---
 Method: dual-agent (A: worker/design-director · B: worker/detector-browser)
+
+> Historical audit captured before the IBM Plex Sans migration. It records the state observed at that time and does not define current project constraints.
 
 ## Design Health Score
 

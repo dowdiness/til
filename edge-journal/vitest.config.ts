@@ -1,21 +1,28 @@
 import { cloudflareTest, readD1Migrations } from "@cloudflare/vitest-pool-workers";
+import stylex from "@stylexjs/unplugin";
 import { defineConfig } from "vitest/config";
 
 const migrations = await readD1Migrations(new URL("./drizzle/migrations", import.meta.url).pathname);
 
 export default defineConfig({
-  plugins: [cloudflareTest({
-    wrangler: { configPath: "./wrangler.jsonc" },
-    miniflare: {
-      compatibilityFlags: ["nodejs_compat"],
-      bindings: {
-        ADMIN_USERNAME: "admin",
-        ADMIN_PASSWORD: "password",
-        COOKIE_SECRET: "test-cookie-secret-at-least-32-bytes",
-        TEST_MIGRATIONS: migrations,
+  plugins: [
+    stylex.raw(
+      { dev: true, runtimeInjection: false },
+      { framework: "vite" },
+    ),
+    cloudflareTest({
+      wrangler: { configPath: "./wrangler.jsonc" },
+      miniflare: {
+        compatibilityFlags: ["nodejs_compat"],
+        bindings: {
+          ADMIN_USERNAME: "admin",
+          ADMIN_PASSWORD: "password",
+          COOKIE_SECRET: "test-cookie-secret-at-least-32-bytes",
+          TEST_MIGRATIONS: migrations,
+        },
       },
-    },
-  })],
+    }),
+  ],
   test: {
     include: ["tests/**/*.test.ts"],
     setupFiles: ["tests/setup.ts"],

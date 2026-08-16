@@ -140,7 +140,7 @@ The interface palette is a single gray family on paper white. Chromatic color is
 
 **Body Font:** IBM Plex Sans Variable / IBM Plex Sans (with system sans-serif fallbacks)
 
-**Character:** A single self-hosted variable sans-serif with an engineered, editorial texture. Synthesis is disabled and `font-display: swap` keeps text available during loading. Hierarchy comes from size, weight (400–500), restrained tracking, and line-height — never from a font-family change. Plex's open forms are allowed to breathe at text sizes; negative tracking is reserved for brand and display roles.
+**Character:** A single self-hosted variable sans-serif with an engineered, editorial texture. Synthesis is disabled and `font-display: swap` keeps text available during loading. Size, weight (400–500), restrained tracking, and line-height establish hierarchy within the same font family. Plex's open forms are allowed to breathe at text sizes; negative tracking appears on brand and display roles.
 
 ### Hierarchy
 - **Brand** (500, 1.125rem, 1.4, −0.01em): wordmark only.
@@ -163,11 +163,11 @@ The public header keeps the wordmark as its only navigation and adds a compact s
 
 The search form lives in a top-anchored native dialog sized to the viewport; its action expands to full width on phones. Admin filter forms use CSS grid with a flexible input column and `auto`-sized controls. At ≤43.75rem journal entries become a two-column title/date row with a dotted rule beneath. At ≤31.25rem admin detail, pagination, and action groups stack vertically; journal title/date rows remain paired so the ledger relationship survives on phones.
 
-The site footer sits after `clamp(6rem, 15vw, 9rem)` of margin — a generous terminal whitespace. Public pages end with the publication name only; admin pages add a quiet Administration context label. Implementation details do not appear in reader-facing navigation or footer copy.
+The site footer sits after `clamp(6rem, 15vw, 9rem)` of margin — a generous terminal whitespace. Public pages end with the publication name; admin pages add a quiet Administration context label.
 
 ## Elevation & Depth
 
-The layout remains physically flat: there are no `box-shadow` values, gradients, or raised cards. A static, nearly transparent monochrome grain tile gives the paper surface a tactile tooth without introducing another composited layer. Optical depth appears only during focus changes: bounded blur softens the ledger as search takes focus and turns article navigation into a short focus pull. Cards appear only when Astryx components render them (e.g., flash banners); the journal index itself remains card-free.
+The layout is physically flat, using a static, nearly transparent monochrome grain tile to give the paper surface a tactile tooth. Optical depth appears during focus changes: bounded blur softens the ledger as search takes focus and turns article navigation into a short focus pull. Astryx components such as flash banners provide the few card surfaces; the journal index is a bare ledger.
 
 ## Shapes
 
@@ -199,26 +199,8 @@ Search and filter buttons show interruptible loading feedback during Inertia vis
 
 ## Motion
 
-Motion is quiet and finite, organized as a focus pull. The journal ledger is the single authored entrance: newly mounted entries resolve from a 2px blur while fading and rising 4px over 125ms, staggered by 30ms and capped at 150ms so the sixth entry settles within 275ms. The sequence never delays interaction or animates layout. Search-dialog entrance and exit both use the strong `--ease-out` curve; entrance is shortened to 225ms, while the app-owned exit remains interruptible and closes the native dialog only after its transition completes. Flash and Undo status regions receive a 165ms fade-and-rise entrance to make server-owned outcomes legible.
+Motion is quiet and finite, organized as a focus pull. The journal ledger is the single authored entrance: newly mounted entries resolve from a 2px blur while fading and rising 4px over 125ms, staggered by 30ms and capped at 150ms so the sixth entry settles within 275ms. Interaction remains available throughout. Search-dialog entrance and exit both use the strong `--ease-out` curve; entrance is 225ms, while the app-owned exit remains interruptible and closes the native dialog after its transition completes. Flash and Undo status regions receive a 165ms fade-and-rise entrance to make server-owned outcomes legible.
 
 Pointer-initiated article navigation uses Inertia's View Transition integration. Only the activated ledger title receives `article-title`, avoiding duplicate transition names while the title moves into its article heading over 225ms. The old root softens to a maximum 6px blur while fading over 125ms, and the new root resolves from the same blur over 225ms; the shared title stays sharp throughout. Search, pagination, modified clicks, and keyboard activation stay immediate. Unsupported browsers use Inertia's normal fallback without a second navigation path.
 
-The client marks devices with at most 4GB reported memory, at most four logical processors, or Save-Data enabled as `data-visual-effects="low"`. That mode lowers page, entry, dialog, and backdrop blur to 2px, 1px, 4px, and 1.5px respectively while preserving the focus relationship. `prefers-reduced-transparency: reduce` removes blur and makes the search plane opaque. `prefers-reduced-motion: reduce` removes all positional movement and stagger: journal entries retain a 95ms opacity entrance, transient status retains a 95ms opacity transition, and dialog exit retains its 125ms opacity-only feedback. Article navigation does not request a View Transition under this preference, with a 1ms CSS safeguard for any transition initiated elsewhere.
-
-## Do's and Don'ts
-
-### Do
-- **Do** keep editorial and interface copy in the self-hosted IBM Plex Sans Variable family at weights 400–500; reserve monospace for slugs and code-like values.
-- **Do** use dotted leaders for structural separators and solid `#8b8b8b` for the article divider only.
-- **Do** maintain the 44rem column and 66ch article body as maximum reading widths.
-- **Do** share the same grammar between public and admin surfaces — same type scale, same leader lines, same column.
-- **Do** use tabular numerals for all dates and page counters.
-- **Do** keep blur bounded to focus changes and keep active titles, inputs, and reading copy sharp.
-
-### Don't
-- **Don't** add decorative chromatic accents, card backgrounds, shadows, or gradients; color remains reserved for semantic states.
-- **Don't** use Astryx brand assets, illustrations, or marketing-page structure.
-- **Don't** add Tailwind, shadcn/ui, or a second component library.
-- **Don't** introduce dark mode as a user toggle — `data-theme="light"` is hardcoded and `color-scheme` is `light`.
-- **Don't** wrap journal entries in containers — the index is deliberately card-free.
-- **Don't** animate the paper grain, apply blur to readable content at rest, or turn transparency into decorative glass chrome.
+The client marks devices with at most 4GB reported memory, at most four logical processors, or Save-Data enabled as `data-visual-effects="low"`. That mode lowers page, entry, dialog, and backdrop blur to 2px, 1px, 4px, and 1.5px respectively while preserving the focus relationship. `prefers-reduced-transparency: reduce` removes blur and makes the search plane opaque. `prefers-reduced-motion: reduce` removes all positional movement and stagger: journal entries retain a 95ms opacity entrance, transient status retains a 95ms opacity transition, and dialog exit retains its 125ms opacity-only feedback. Article navigation uses the normal Inertia path under this preference, with a 1ms CSS safeguard for any transition initiated elsewhere.

@@ -8,6 +8,7 @@ import { router, useForm } from "@inertiajs/react";
 import { useEffect, useEffectEvent, useState, type FormEvent } from "react";
 import type { PostInput } from "../../domain/post";
 import { isPostStatus, validatePostInput, type FieldErrors } from "../../domain/post-validation";
+import { astryxOverrides } from "../styles/astryx-overrides.stylex";
 
 type PostFormProps = {
   action: "create" | "edit";
@@ -108,6 +109,7 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
           htmlName="title"
           isRequired
           width="100%"
+          xstyle={astryxOverrides.touchTextInput}
         />
         <TextInput
           label="Slug"
@@ -120,6 +122,7 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
           htmlName="slug"
           isRequired
           width="100%"
+          xstyle={astryxOverrides.touchTextInput}
         />
         <TextArea
           label="Excerpt"
@@ -167,7 +170,13 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
           width="100%"
         />
         {form.isDirty ? (
-          <Text type="supporting" color="accent" as="p" className="unsaved" role="status">
+          <Text
+            type="supporting"
+            color="accent"
+            as="p"
+            xstyle={astryxOverrides.unsavedNotice}
+            role="status"
+          >
             Unsaved changes are remembered in this browser history entry.
           </Text>
         ) : null}

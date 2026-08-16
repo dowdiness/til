@@ -10,6 +10,7 @@ import {
 } from "../../../components/AdminPostFilters";
 import { Layout } from "../../../components/Layout";
 import type { PageProps } from "../../../pages.gen";
+import { astryxOverrides } from "../../../styles/astryx-overrides.stylex";
 
 type Props = PageProps<"Admin/Posts/Index">;
 
@@ -75,7 +76,7 @@ export default function Index({ posts, undo, flash }: Props) {
                   Updated {updatedDate(post.updatedAt)}
                 </Text>
               </div>
-              <Text as="p" color="secondary" className="entry-excerpt">
+              <Text as="p" color="secondary" xstyle={astryxOverrides.entryExcerpt}>
                 {post.excerpt}
               </Text>
               <div className="card-actions">

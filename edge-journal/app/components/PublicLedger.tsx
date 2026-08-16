@@ -1,4 +1,5 @@
 import { Button } from "@astryxdesign/core/Button";
+import * as stylex from "@stylexjs/stylex";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Text } from "@astryxdesign/core/Text";
@@ -7,8 +8,11 @@ import type { MouseEvent } from "react";
 import type { PublicPostSummary } from "../../domain/post";
 import { publishedDate } from "../../lib/published-date";
 import { serializePublicSearch } from "../../lib/search-params";
+import { astryxOverrides } from "../styles/astryx-overrides.stylex";
 
 const partialProps = ["posts", "query", "errors", "flash"];
+const paginationSlotClassName = stylex.props(astryxOverrides.paginationSlot).className;
+const paginationEndSlotClassName = stylex.props(astryxOverrides.paginationEndSlot).className;
 
 type Posts = {
   items: PublicPostSummary[];
@@ -44,6 +48,7 @@ export function PublicLedger({ posts, query, isSearching, onClear, onOpenPost }:
             role="status"
             aria-live="polite"
             aria-atomic="true"
+            xstyle={astryxOverrides.resultCount}
           >
             {posts.total} {posts.total === 1 ? "note" : "notes"}
             {query ? <> matching <q>{query}</q></> : null}
@@ -83,7 +88,7 @@ export function PublicLedger({ posts, query, isSearching, onClear, onOpenPost }:
                   {publishedDate(post.publishedAt, "short")}
                 </time>
               </div>
-              <Text as="p" color="secondary" className="entry-excerpt">
+              <Text as="p" color="secondary" xstyle={astryxOverrides.entryExcerpt}>
                 {post.excerpt}
               </Text>
             </article>
@@ -107,7 +112,7 @@ export function PublicLedger({ posts, query, isSearching, onClear, onOpenPost }:
       <nav aria-label="Pagination" className="pagination">
         {posts.page > 1 ? (
           <Link
-            className="pagination-link"
+            className={`pagination-link ${paginationSlotClassName}`}
             href={serializePublicSearch("/", {
               page: posts.page - 1,
               q: query || null,
@@ -118,13 +123,18 @@ export function PublicLedger({ posts, query, isSearching, onClear, onOpenPost }:
           >
             Previous
           </Link>
-        ) : <span />}
-        <Text type="supporting" color="secondary" hasTabularNumbers>
+        ) : <span className={paginationSlotClassName} />}
+        <Text
+          type="supporting"
+          color="secondary"
+          hasTabularNumbers
+          xstyle={astryxOverrides.paginationSlot}
+        >
           Page {posts.page} of {posts.pageCount}
         </Text>
         {posts.page < posts.pageCount ? (
           <Link
-            className="pagination-link"
+            className={`pagination-link ${paginationEndSlotClassName}`}
             href={serializePublicSearch("/", {
               page: posts.page + 1,
               q: query || null,
@@ -135,7 +145,7 @@ export function PublicLedger({ posts, query, isSearching, onClear, onOpenPost }:
           >
             Next
           </Link>
-        ) : <span />}
+        ) : <span className={paginationEndSlotClassName} />}
       </nav>
     </>
   );

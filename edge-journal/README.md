@@ -1,6 +1,6 @@
 # Edge Journal
 
-Edge Journal is a compact, server-driven editorial blog for Cloudflare Workers. It demonstrates public reading pages plus a Basic Auth protected admin CRUD without introducing a REST API, client data-fetching layer, or client router.
+Edge Journal is a compact, server-driven editorial blog for Cloudflare Workers. It demonstrates public reading pages plus a Basic Auth protected admin CRUD built with Inertia page data and navigation.
 
 Public pages (`Posts/Index` and `Posts/Show`) are server-rendered on initial document requests using Inertia and React's `renderToString()`, then hydrated by Inertia/React in the browser. Admin and error pages remain CSR shells that mount from a serialized Inertia page object. Inertia navigation and the JSON/partial reload protocol are unchanged for both SSR'd and CSR routes.
 
@@ -22,15 +22,17 @@ All direct dependencies are pinned in `package.json` and `pnpm-lock.yaml`:
 - `@cloudflare/vitest-pool-workers` 0.21.3 and Vitest 4.1.10 — tests inside the Workers runtime with isolated D1 storage
 - TypeScript 5.9.3 — strict static checking
 
-Inertia lets each Hono GET route pass DTOs directly as page props. React does not call `fetch()` for ordinary page data, and there is no independent API contract or duplicated client cache to maintain. Pointer-initiated article visits opt into Inertia's native View Transition integration for a shared-title transition; keyboard navigation, reduced-motion users, unsupported browsers, search, and pagination retain normal immediate navigation.
+Inertia lets each Hono GET route pass DTOs directly as page props and currently owns ordinary page-data navigation without an independent client cache. Pointer-initiated article visits opt into Inertia's native View Transition integration for a shared-title transition; keyboard navigation, reduced-motion users, unsupported browsers, search, and pagination retain normal immediate navigation.
 
 ## Astryx design system
 
-Astryx is the explicit exception to this demo's original "no external UI framework" constraint. Tailwind, shadcn/ui, and other UI frameworks remain excluded. Production compiles Astryx TypeScript + StyleX source via `@astryxdesign/build/vite`, emitting only styles for imported components. Development imports the pre-built component CSS via `src/astryx-dev.css` for Cloudflare Worker startup compatibility. Astryx reset and Neutral theme remain built/static in both modes.
+Astryx supplies the current UI components and theme. Production compiles Astryx TypeScript and app-authored StyleX via `@astryxdesign/build/vite`, emitting styles for imported components and overrides. Development keeps Astryx on its pre-built component CSS via `src/astryx-dev.css` while the same plugin compiles app-authored StyleX without aliasing Astryx to source. Astryx reset and Neutral theme remain built/static in both modes.
+
+Component-facing overrides are co-located in `app/styles` and passed through Astryx `xstyle`; raw pagination slots use `stylex.props`. Global CSS remains responsible for document and browser surfaces, descendant input sizing, View Transition pseudo-elements, and dialog backdrops. Two narrowly scoped unlayered rules bridge Astryx production atoms for the dialog closing state and destructive button color without raising declaration priority.
 
 `app/inertia-app.tsx` shares the Astryx `Theme` and `LinkProvider` wrapper between public SSR and browser hydration. `src/client.tsx` boots that shared tree. The provider delegates ordinary Astryx links and link-shaped buttons to `@inertiajs/react` rather than replacing Inertia navigation. Advanced links that need partial reload or hover prefetch continue to use Inertia `Link` directly, styled with Astryx tokens.
 
-The interface uses Astryx `Button`, `TextInput`, `TextArea`, `Selector`, `Banner`, `Stack`, `Heading`, `Text`, and `EmptyState`. Astryx Neutral is customized into a light-only, card-free publication ledger: subtly grained paper-white surfaces, graphite typography, dotted leaders, near-square controls, and a centered 44rem column. A bounded focus-pull language uses blur for ledger arrival, article View Transitions, and the translucent search plane while keeping active text sharp. Devices reporting limited memory or concurrency, Save-Data, reduced transparency, or reduced motion receive progressively lighter effects. A preloaded, self-hosted IBM Plex Sans variable font drives both Astryx and editorial typography with a compact role-based scale. Public pages prioritize quiet reading and scanning; administration reuses the same visual grammar while remaining task-focused. The design takes structural inspiration from unvalley.me without copying its identity, profile content, logo, or assets. See `DESIGN.md` for the durable rules.
+The interface uses Astryx `Button`, `TextInput`, `TextArea`, `Selector`, `Banner`, `Stack`, `Heading`, `Text`, and `EmptyState`. Astryx Neutral is customized into a light-only, card-free publication ledger: subtly grained paper-white surfaces, graphite typography, dotted leaders, near-square controls, and a centered 44rem column. A bounded focus-pull language uses blur for ledger arrival, article View Transitions, and the translucent search plane while keeping active text sharp. Devices reporting limited memory or concurrency, Save-Data, reduced transparency, or reduced motion receive progressively lighter effects. A preloaded, self-hosted IBM Plex Sans variable font drives both Astryx and editorial typography with a compact role-based scale. Public pages prioritize quiet reading and scanning; administration reuses the same visual grammar while remaining task-focused. The design takes structural inspiration from unvalley.me. See `DESIGN.md` for the current visual system.
 
 ## Required local values
 
@@ -126,8 +128,9 @@ Production migration and Worker deployment are intentionally separate operationa
 - `app/server.tsx` — Hono middleware and thin routes
 - `app/root-view.tsx` — React document shell that selects public SSR or a CSR body and emits Vite assets
 - `app/pages` and `app/components` — typed Inertia pages and shared UI
-- `app/pages.gen.ts` — generated by `inertiaPages()`; do not edit it manually
-- `src/client.tsx` and `src/styles.css` — Astryx providers, pre-built theme imports, and application-specific editorial layout
+- `app/styles` — app-authored StyleX overrides passed through Astryx `xstyle`
+- `app/pages.gen.ts` — generated by `inertiaPages()`
+- `src/client.tsx` and `src/styles.css` — Astryx providers, pre-built theme imports, and global editorial/browser styling
 - `domain` — Valibot validation and the pure publication timestamp transition
 - `db` — request-scoped `drizzle(c.env.DB)` construction, explicit DTO mapping, and purpose-specific queries/commands
 - `drizzle/migrations` and `drizzle/seed.sql` — generated schema history and idempotent fixtures
@@ -136,7 +139,7 @@ Production migration and Worker deployment are intentionally separate operationa
 
 ## Inertia conveniences
 
-Public search, pagination, and admin filtering use partial reloads with URL synchronization, preserved component state, and preserved scroll position. Shared definitions in `lib/search-params.ts` use `nuqs/server`: `createLoader` parses Hono requests and `createSerializer` builds public `q`/`page` and admin `q`/`status` URLs while omitting default values. Public search keeps its uncommitted Dialog text local and applies it through Inertia on submit. The inline admin filters use `useQueryStates` with nuqs' community-contributed Inertia adapter from the official registry, extended locally to retain Inertia partial props and expose navigation completion to React transitions. Text changes use nuqs' 300ms `debounce()`, while status changes, Clear, and Enter apply immediately. The adapter relies on nuqs' explicitly unstable custom-adapter API and must be revalidated on nuqs upgrades; no independent debounce timer is used. Public search opens from the journal header in an accessible Astryx dialog; active queries remain visible beside the server-owned result count. Search and filter controls expose interruptible loading feedback during visits. Public article links prefetch their page object on hover for faster detail navigation, while authenticated admin navigation marks the current section with `aria-current`.
+Public search, pagination, and admin filtering use partial reloads with URL synchronization, preserved component state, and preserved scroll position. Shared definitions in `lib/search-params.ts` use `nuqs/server`: `createLoader` parses Hono requests and `createSerializer` builds public `q`/`page` and admin `q`/`status` URLs while omitting default values. Public search keeps its uncommitted Dialog text local and applies it through Inertia on submit. The inline admin filters use `useQueryStates` with nuqs' community-contributed Inertia adapter from the official registry, extended locally to retain Inertia partial props and expose navigation completion to React transitions. Text changes use nuqs' 300ms `debounce()`, while status changes, Clear, and Enter apply immediately. The adapter relies on nuqs' explicitly unstable, upgrade-sensitive custom-adapter API; it uses no independent debounce timer. Public search opens from the journal header in an accessible Astryx dialog; active queries remain visible beside the server-owned result count. Search and filter controls expose interruptible loading feedback during visits. Public article links prefetch their page object on hover for faster detail navigation, while authenticated admin navigation marks the current section with `aria-current`.
 
 New and edit forms give `useForm` a route-specific remember key, so long drafts survive Inertia navigation and browser history restoration. Dirty forms warn before an Inertia GET navigation or full page unload; prefetch and the form's own mutation requests are never blocked by that guard. Delete is implemented as a reversible soft delete: the redirect exposes an authenticated Undo action, while all public, admin, and edit queries exclude deleted rows.
 
@@ -160,6 +163,6 @@ Hono CSRF middleware checks `Origin` / Fetch Metadata for unsafe requests with b
 
 Article bodies are escaped React text rendered with `white-space: pre-wrap`; `dangerouslySetInnerHTML` is used only for `serializePage()` inside the document-shell JSON script, as required by `@hono/inertia`. Generic error pages expose neither stack traces nor database rows, and structured server logs contain only the request ID and error class.
 
-Astryx improves consistency and accessibility coverage but increases the client CSS and component bundle compared with the original plain-CSS implementation. Keep per-component subpath imports and review bundle output when adding more Astryx modules.
+Astryx improves consistency and accessibility coverage but increases the client CSS and component bundle compared with the original plain-CSS implementation. The current code uses per-component subpath imports.
 
 Before evolving this demo into a production product, add an external identity provider or hardened rotating sessions, login and mutation rate limits, CSP tailored to deployed assets, secret rotation, audit logs, backup/restore procedures, a soft-delete retention and purge policy, observability alerts, accessibility testing, pagination abuse limits, and a staged migration/deployment process.

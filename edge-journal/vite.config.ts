@@ -5,15 +5,23 @@ import { defineConfig } from "vite";
 import { inertiaPages } from "@hono/inertia/vite";
 import ssrPlugin from "vite-ssr-components/plugin";
 
-// Cloudflare owns SSR environments; Astryx's config plugin already supplies the required aliases/excludes.
-const astryxPlugins = astryxStylex({ lightningcssTargets: LIGHTNINGCSS_TARGETS }).map((plugin) =>
-  plugin.name === "@stylexjs/unplugin" ? { ...plugin, config: undefined } : plugin,
-);
+function createAstryxPlugins(command: "build" | "serve") {
+  const sourceBuild = command === "build";
+
+  return astryxStylex({
+    dev: !sourceBuild,
+    lightningcssTargets: LIGHTNINGCSS_TARGETS,
+  })
+    .filter((plugin) => sourceBuild || plugin.name !== "astryx-config")
+    .map((plugin) =>
+      plugin.name === "@stylexjs/unplugin" ? { ...plugin, config: undefined } : plugin,
+    );
+}
 
 export default defineConfig(({ command }) => ({
   plugins: [
     inertiaPages(),
-    ...(command === "build" ? astryxPlugins : []),
+    ...createAstryxPlugins(command),
     cloudflare(),
     ssrPlugin(),
     react(),

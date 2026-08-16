@@ -26,6 +26,8 @@
     --color-text-placeholder: #737373;
     --color-border: #dedede;
     --color-border-emphasized: #ababab;
+    --color-rule-strong: #b8b8b8;
+    --color-background-unsaved: #f5f5f5;
     --font-family-journal: "IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     --font-family-body: var(--font-family-journal);
     --font-family-heading: var(--font-family-journal);
@@ -156,14 +158,6 @@
     margin-bottom: clamp(3.75rem, 9vw, 5.5rem);
   }
 
-  .brand-link {
-    color: #171717 !important;
-    font-size: 1.125rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    text-decoration: none;
-  }
-
   .site-nav {
     display: flex;
     align-items: center;
@@ -191,21 +185,6 @@
     margin-inline-end: -0.45rem;
   }
 
-  .search-trigger,
-  .dialog-close {
-    min-width: 2rem;
-    padding-inline: 0.45rem;
-    color: var(--color-text-secondary);
-  }
-
-  .search-trigger:hover,
-  .search-trigger:focus-visible,
-  .search-trigger[data-has-query="true"],
-  .dialog-close:hover,
-  .dialog-close:focus-visible {
-    color: var(--color-text-primary);
-  }
-
   .search-icon,
   .close-icon {
     width: 1.125rem;
@@ -217,7 +196,6 @@
     stroke-width: 1.65;
   }
 
-  .brand-link:active,
   .site-nav a:active,
   .story-link:active,
   .pagination-link:active {
@@ -269,14 +247,14 @@
     line-height: 1.35;
   }
 
-  .page-intro p,
+  .page-intro > p,
   .form-heading p,
   .admin-heading p {
     display: block;
     margin: 0;
   }
 
-  .page-intro p:first-of-type {
+  .page-intro > p:first-of-type {
     max-width: 62ch;
     margin-top: 1.85rem;
     color: #555555;
@@ -287,20 +265,12 @@
     text-wrap: pretty;
   }
 
-  .page-intro p:last-child {
-    margin-top: 1rem;
-  }
-
   .result-summary {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.35rem 0.65rem;
     margin-top: 1rem;
-  }
-
-  .result-summary p {
-    margin: 0 !important;
   }
 
   .result-summary q {
@@ -314,36 +284,6 @@
   .card-actions a {
     min-width: auto;
     padding-inline: 0.45rem;
-  }
-
-  .search-dialog {
-    margin-inline: auto !important;
-    border: 1px solid var(--color-border-emphasized);
-    border-radius: var(--radius-container);
-    background-color: #ffffff;
-    background-image: url("/paper-grain.png");
-    background-repeat: repeat;
-    background-size: 96px 96px;
-    box-shadow: none !important;
-    color: var(--color-text-primary);
-    transition:
-      opacity var(--duration-medium-min) var(--ease-out),
-      transform var(--duration-medium-min) var(--ease-out);
-  }
-
-  .search-dialog[open] {
-    animation-duration: var(--duration-medium-min) !important;
-    animation-timing-function: var(--ease-out) !important;
-  }
-
-  .search-dialog--preparing {
-    animation-name: none !important;
-  }
-
-  .search-dialog--closing {
-    animation-name: none !important;
-    opacity: 0 !important;
-    transform: translateY(-4px) scale(0.98) !important;
   }
 
   .search-dialog::backdrop {
@@ -497,15 +437,6 @@
     text-decoration: underline;
   }
 
-  .entry-excerpt {
-    max-width: 68ch;
-    margin: 0.2rem 0 0;
-    color: var(--color-text-secondary);
-    font-size: 0.8125rem;
-    line-height: 1.55;
-    text-wrap: pretty;
-  }
-
   .pagination {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -515,10 +446,6 @@
     padding-top: 1rem;
     border-top: 1px dotted #d4d4d4;
     text-align: center;
-  }
-
-  .pagination > :last-child {
-    justify-self: end;
   }
 
   .pagination-link {
@@ -534,10 +461,6 @@
 
   .article-header {
     padding-bottom: 2rem;
-  }
-
-  .article-title {
-    view-transition-name: article-title;
   }
 
   .article-header > p:first-child {
@@ -672,10 +595,6 @@
     margin-top: 0.35rem;
   }
 
-  .delete-action {
-    color: #963a3a !important;
-  }
-
   .form-page {
     max-width: 42rem;
     margin-inline: auto;
@@ -698,14 +617,6 @@
   .post-form {
     padding-top: 2rem;
     border-top: 1px dotted #d4d4d4;
-  }
-
-  .unsaved {
-    margin: 0;
-    padding: 0.75rem;
-    border: 1px dotted #b8b8b8;
-    border-radius: var(--radius-element);
-    background: #f5f5f5;
   }
 
   .form-actions {
@@ -768,10 +679,6 @@
       display: none;
     }
 
-    .entry-excerpt {
-      padding-right: 1.5rem;
-    }
-
     .admin-heading {
       align-items: flex-start;
     }
@@ -787,7 +694,7 @@
       gap: 1rem;
     }
 
-    .page-intro p:first-of-type {
+    .page-intro > p:first-of-type {
       margin-top: 1.5rem;
     }
 
@@ -801,11 +708,6 @@
     .journal-entry,
     .admin-entry {
       padding-block: 0.75rem;
-    }
-
-    .entry-excerpt {
-      margin-top: 0.45rem;
-      padding-right: 0;
     }
 
     .admin-heading {
@@ -828,10 +730,6 @@
       grid-template-columns: 1fr;
     }
 
-    .pagination > * {
-      justify-self: center !important;
-    }
-
     .site-footer {
       flex-wrap: wrap;
     }
@@ -849,15 +747,9 @@
       align-items: center;
     }
 
-    .astryx-text-input {
-      height: 2.75rem !important;
-      min-height: 2.75rem !important;
-      padding-block: 0 !important;
-    }
-
     .astryx-text-input input {
-      height: 2.75rem !important;
-      min-height: 2.75rem !important;
+      height: 2.75rem;
+      min-height: 2.75rem;
     }
 
     .story-link {
@@ -952,9 +844,25 @@
     .search-dialog {
       transition: opacity var(--duration-fast) var(--ease-out);
     }
+  }
+}
 
-    .search-dialog--closing {
-      transform: none !important;
-    }
+/*
+ * Astryx production atoms are unlayered. Keep these two integration overrides
+ * unlayered as well so they can win by specificity without priority escalation.
+ */
+.search-dialog.search-dialog--closing {
+  animation-name: none;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
+}
+
+.astryx-button.delete-action {
+  color: #963a3a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-dialog.search-dialog--closing {
+    transform: none;
   }
 }

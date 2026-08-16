@@ -5,6 +5,7 @@ import { IconButton } from "@astryxdesign/core/IconButton";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { astryxOverrides } from "../styles/astryx-overrides.stylex";
 
 type SearchPhase = "closed" | "open" | "preparing" | "closing";
 
@@ -56,7 +57,7 @@ function SearchForm({ query, isSearching, onClose, onSubmit }: SearchFormProps) 
           label="Close search"
           icon={<CloseIcon />}
           variant="ghost"
-          className="dialog-close"
+          xstyle={astryxOverrides.iconButton}
           onClick={onClose}
         />
       </div>
@@ -73,6 +74,7 @@ function SearchForm({ query, isSearching, onClose, onSubmit }: SearchFormProps) 
         hasAutoFocus
         hasClear
         width="100%"
+        xstyle={astryxOverrides.touchTextInput}
       />
       <div className="search-dialog-actions">
         <Button
@@ -126,7 +128,10 @@ export function PublicSearchDialog({ query, isSearching, onSearch }: Props) {
         label={query ? `Search notes. Current search: ${query}` : "Search notes"}
         icon={<SearchIcon />}
         variant="ghost"
-        className="search-trigger"
+        xstyle={[
+          astryxOverrides.iconButton,
+          query ? astryxOverrides.activeIconButton : null,
+        ]}
         aria-controls="note-search-dialog"
         aria-expanded={isOpen}
         aria-haspopup="dialog"
@@ -137,7 +142,12 @@ export function PublicSearchDialog({ query, isSearching, onSearch }: Props) {
         id="note-search-dialog"
         aria-label="Search notes"
         ref={searchDialogRef}
-        className={`search-dialog${phase === "preparing" ? " search-dialog--preparing" : ""}${isClosing ? " search-dialog--closing" : ""}`}
+        className={`search-dialog${isClosing ? " search-dialog--closing" : ""}`}
+        xstyle={[
+          astryxOverrides.searchDialog,
+          isOpen ? astryxOverrides.searchDialogOpen : null,
+          phase === "preparing" ? astryxOverrides.searchDialogPreparing : null,
+        ]}
         isOpen={isOpen}
         onOpenChange={(nextIsOpen) => {
           if (!nextIsOpen) closeSearch();

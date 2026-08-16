@@ -3,6 +3,7 @@ import { Link } from "@astryxdesign/core/Link";
 import { Text } from "@astryxdesign/core/Text";
 import { Head } from "@inertiajs/react";
 import { Layout } from "../../components/Layout";
+import { astryxOverrides } from "../../styles/astryx-overrides.stylex";
 import type { PageProps } from "../../pages.gen";
 import { publishedDate } from "../../../lib/published-date";
 
@@ -19,7 +20,14 @@ export default function Show({ post, flash }: Props) {
           <Text type="supporting" color="secondary" as="p">
             <time dateTime={post.publishedAt}>{publishedDate(post.publishedAt, "long")}</time>
           </Text>
-          <Heading className="article-title" level={1} type="display-2" textWrap="balance">{post.title}</Heading>
+          <Heading
+            level={1}
+            type="display-2"
+            textWrap="balance"
+            xstyle={astryxOverrides.articleTitle}
+          >
+            {post.title}
+          </Heading>
           <Text type="large" color="secondary" as="p">{post.excerpt}</Text>
         </header>
         <div className="article-divider" aria-hidden="true" />

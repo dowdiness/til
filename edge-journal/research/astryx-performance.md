@@ -89,7 +89,7 @@ Create a reversible source-build prototype, then compare against the existing pr
 
 ## Verified result
 
-The source-build optimization was applied and retained based on measured improvement. Production build required a Cloudflare compatibility adaptation: the `@stylexjs/unplugin` `config` hook is dropped because it is redundant with the Cloudflare Vite plugin, while the `astryxStylex` config plugin retains the required aliases and dependency-prebundling excludes. Development continues to load pre-built component CSS because Astryx source uses `defineVars`, which fail during Worker introspection in dev.
+The source-build optimization was applied and retained based on measured improvement. Production build required a Cloudflare compatibility adaptation: the `@stylexjs/unplugin` `config` hook is dropped because it is redundant with the Cloudflare Vite plugin, while the `astryxStylex` config plugin retains the required aliases and dependency-prebundling excludes. Development continues to load pre-built component CSS because Astryx source uses `defineVars`, which fail during Worker introspection in dev. The Astryx StyleX plugin still compiles app-authored overrides in development, but its source-alias config is omitted so Astryx itself continues to resolve to the pre-built distribution.
 
 Final comparison (cold mobile Fast 4G / 4× CPU slowdown, same public FCP/LCP target):
 

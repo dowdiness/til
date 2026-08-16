@@ -5,6 +5,7 @@ import { debounce, defaultRateLimit, useQueryStates } from "nuqs";
 import { useTransition, type FormEvent } from "react";
 import { adminSearchParams } from "../../lib/search-params";
 import { NuqsInertiaAdapter } from "../nuqs-inertia-adapter";
+import { astryxOverrides } from "../styles/astryx-overrides.stylex";
 
 const statusOptions = [
   { value: "all", label: "All statuses" },
@@ -58,6 +59,7 @@ function AdminPostFilterFields() {
         hasClear
         isLoading={isFiltering}
         width="100%"
+        xstyle={astryxOverrides.touchTextInput}
       />
       <Selector
         label="Status"
