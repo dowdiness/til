@@ -40,16 +40,16 @@
   --transition-duration-fast-max: var(--duration-fast-max);
   --transition-duration-status: 165ms;
 
-  --text-label: 0.8125rem;
+  --text-label: 1rem;
   --text-label--line-height: 1.5;
-  --text-supporting: 0.75rem;
+  --text-supporting: 0.875rem;
   --text-supporting--line-height: 1.5;
-  --text-entry-title: 0.9375rem;
+  --text-entry-title: 1.125rem;
   --text-entry-title--line-height: 1.45;
-  --text-lead: 1.0625rem;
-  --text-lead--line-height: 1.7;
-  --text-article: 1rem;
-  --text-article--line-height: 1.8;
+  --text-lead: 1.1875rem;
+  --text-lead--line-height: 1.65;
+  --text-article: 1.125rem;
+  --text-article--line-height: 1.75;
 
   --animate-ledger-entry: ledger-entry-in var(--duration-fast) var(--ease-out) both;
   --animate-ledger-fade: ledger-entry-fade var(--duration-fast-min) var(--ease-out) both;

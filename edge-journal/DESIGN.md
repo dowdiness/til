@@ -25,52 +25,52 @@ typography:
     lineHeight: 1.65
   brand:
     fontFamily: "IBM Plex Sans Variable, IBM Plex Sans, ui-sans-serif"
-    fontSize: "1.125rem"
+    fontSize: "1.25rem"
     fontWeight: 500
     lineHeight: 1.4
     letterSpacing: "-0.01em"
   display:
     fontFamily: "IBM Plex Sans Variable, IBM Plex Sans, ui-sans-serif"
-    fontSize: "clamp(2rem, 6vw, 2.65rem)"
+    fontSize: "clamp(2.25rem, 7vw, 3rem)"
     fontWeight: 500
-    lineHeight: 1.15
+    lineHeight: 1.12
     letterSpacing: "-0.02em"
   heading:
     fontFamily: "IBM Plex Sans Variable, IBM Plex Sans, ui-sans-serif"
-    fontSize: "1.25rem"
+    fontSize: "1.5rem"
     fontWeight: 500
-    lineHeight: 1.35
+    lineHeight: 1.3
     letterSpacing: "-0.012em"
   lead:
     fontFamily: "IBM Plex Sans Variable, IBM Plex Sans, ui-sans-serif"
-    fontSize: "1.0625rem"
+    fontSize: "1.1875rem"
     fontWeight: 400
-    lineHeight: 1.7
+    lineHeight: 1.65
     letterSpacing: "0"
   reading:
     fontFamily: "IBM Plex Sans Variable, IBM Plex Sans, ui-sans-serif"
-    fontSize: "1rem"
+    fontSize: "1.125rem"
     fontWeight: 400
-    lineHeight: 1.8
+    lineHeight: 1.75
   entry:
     fontFamily: "IBM Plex Sans Variable, IBM Plex Sans, ui-sans-serif"
-    fontSize: "0.9375rem"
+    fontSize: "1.125rem"
     fontWeight: 500
     lineHeight: 1.45
     letterSpacing: "0"
   utility:
     fontFamily: "IBM Plex Sans Variable, IBM Plex Sans, ui-sans-serif"
-    fontSize: "0.875rem"
+    fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.5
   label:
     fontFamily: "IBM Plex Sans Variable, IBM Plex Sans, ui-sans-serif"
-    fontSize: "0.8125rem"
+    fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.5
   supporting:
     fontFamily: "IBM Plex Sans Variable, IBM Plex Sans, ui-sans-serif"
-    fontSize: "0.75rem"
+    fontSize: "0.875rem"
     fontWeight: 400
 rounded:
   element: "0.25rem"
@@ -143,15 +143,15 @@ The interface palette is a single gray family on paper white. Chromatic color is
 **Character:** A single self-hosted variable sans-serif with an engineered, editorial texture. Synthesis is disabled and `font-display: swap` keeps text available during loading. Size, weight (400–500), restrained tracking, and line-height establish hierarchy within the same font family. Plex's open forms are allowed to breathe at text sizes; negative tracking appears on brand and display roles.
 
 ### Hierarchy
-- **Brand** (500, 1.125rem, 1.4, −0.01em): wordmark only.
-- **Article display** (500, `clamp(2rem, 6vw, 2.65rem)`, 1.15, −0.02em): article `h1` only. Restrained tracking keeps large Plex forms composed.
-- **Page heading** (500, 1.25rem, 1.35, −0.012em): page-intro `h1`, admin headings, form headings.
-- **Lead** (400, 1.0625rem, 1.7, natural tracking): introductory and article-deck copy.
-- **Entry title** (500, 0.9375rem, 1.45, natural tracking): journal entry titles. A firmer mid-weight keeps them legible alongside the leader and date.
-- **Body** (400, 1rem, 1.65): ordinary web text. Article body uses 1rem / 1.8 for long-form reading.
-- **Utility** (400, 0.875rem, 1.5): article footer links and compact controls.
-- **Label** (400, 0.8125rem, 1.5): nav links, dates, section headings, excerpts, metadata. Tabular numerals for dates and pagination.
-- **Supporting** (400, 0.75rem, —): footer, post-meta, admin entry detail.
+- **Brand** (500, 1.25rem, 1.4, −0.01em): wordmark only.
+- **Article display** (500, `clamp(2.25rem, 7vw, 3rem)`, 1.12, −0.02em): article `h1` only. Restrained tracking keeps large Plex forms composed.
+- **Page heading** (500, 1.5rem, 1.3, −0.012em): page-intro `h1`, admin headings, form headings.
+- **Lead** (400, 1.1875rem, 1.65, natural tracking): introductory and article-deck copy.
+- **Entry title** (500, 1.125rem, 1.45, natural tracking): journal entry titles. A firmer mid-weight keeps them legible alongside the leader and date.
+- **Body** (400, 1rem, 1.65): ordinary web text. Article body uses 1.125rem / 1.75 for long-form reading.
+- **Utility** (400, 1rem, 1.5): article footer links and compact controls.
+- **Label** (400, 1rem, 1.5): nav links, dates, section headings, excerpts, and pagination. Tabular numerals are used for dates and pagination.
+- **Supporting** (400, 0.875rem, 1.5): the sole small-text exception, reserved for tertiary metadata such as counts, footer text, post meta, and admin update details.
 
 **The Single-Family Rule.** Editorial and interface copy uses self-hosted IBM Plex Sans Variable at weights 400–500. Astryx body and heading tokens resolve to the same family. Monospace is restricted to slugs and code-like values rendered by Astryx `Text type="code"`.
 
@@ -176,7 +176,7 @@ Element radius is `0.25rem` (near-square). Container radius is `0.35rem`. Page-l
 ## Components
 
 ### Journal Entry
-Bare rows with no background, border, or container. On wide screens, title and date share a flex baseline with a `1px dotted` leader filling the space between. On narrow screens, they remain paired in a two-column row; the leader becomes a full dotted rule beneath that row while long titles wrap independently of the fixed date. Excerpt sits below in metadata gray at 0.8125rem.
+Bare rows with no background, border, or container. On wide screens, title and date share a flex baseline with a `1px dotted` leader filling the space between. On narrow screens, they remain paired in a two-column row; the leader becomes a full dotted rule beneath that row while long titles wrap independently of the fixed date. Excerpt sits below in metadata gray at 1rem.
 
 ### Search Dialog
 The journal-index header action is an Astryx `IconButton` with Astryx's semantic search `Icon`. It opens Astryx's native `Dialog` near the top of the viewport with a 78% white paper surface, the same static grain as the page, an emphasized 1px border, dotted internal rule, auto-focused clearable `TextInput`, explicit close action using Astryx's semantic close `Icon`, and primary submit. On capable hardware, a 10px surface backdrop blur and 4px page blur establish a transparent focus plane without a shadow; unsupported browsers receive an opaque white dialog. Escape and backdrop clicks dismiss it and restore focus. An active query is repeated beside the result count with a compact Clear action so server-owned filter state remains visible after the dialog closes.

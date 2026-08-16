@@ -162,6 +162,26 @@
 }
 
 /* Astryx integration boundary: production atoms are intentionally unlayered. */
+html[data-astryx-theme="neutral"],
+html[data-astryx-theme="neutral"] * {
+  --font-size-xs: 1rem;
+  --font-size-sm: 1rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.6875rem;
+  --font-size-3xl: 2.125rem;
+  --font-size-4xl: 2.625rem;
+  --font-size-5xl: 3.25rem;
+  --text-supporting-size: 0.875rem;
+  --text-supporting-leading: 1.5;
+}
+
+.brand-link .astryx-text {
+  font-size: inherit;
+  line-height: inherit;
+}
+
 .text-hover-link {
   transition:
     text-decoration-color 140ms var(--ease-out),
