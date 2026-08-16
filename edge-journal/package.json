@@ -1,0 +1,52 @@
+{
+  "name": "edge-journal",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "pnpm typecheck && pnpm test && pnpm build",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings worker-configuration.d.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply edge-journal-db --local",
+    "db:seed:local": "wrangler d1 execute edge-journal-db --local --file=drizzle/seed.sql",
+    "deploy": "vite build && wrangler deploy"
+  },
+  "dependencies": {
+    "@astryxdesign/core": "0.4.1",
+    "@astryxdesign/theme-neutral": "0.4.1",
+    "@fontsource-variable/ibm-plex-sans": "5.3.0",
+    "@hono/inertia": "0.7.0",
+    "@inertiajs/core": "3.6.1",
+    "@inertiajs/react": "3.6.1",
+    "@stylexjs/stylex": "0.19.0",
+    "drizzle-orm": "0.45.2",
+    "hono": "4.13.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "valibot": "1.4.2",
+    "vite-ssr-components": "0.6.1"
+  },
+  "devDependencies": {
+    "@astryxdesign/build": "0.4.1",
+    "@babel/core": "7.28.5",
+    "@cloudflare/vite-plugin": "1.52.1",
+    "@cloudflare/vitest-pool-workers": "0.21.3",
+    "@stylexjs/babel-plugin": "0.19.0",
+    "@stylexjs/unplugin": "0.19.0",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.13",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.5",
+    "drizzle-kit": "0.31.10",
+    "typescript": "5.9.3",
+    "vite": "8.2.1",
+    "vitest": "4.1.10",
+    "wrangler": "4.123.0"
+  },
+  "packageManager": "pnpm@11.17.0"
+}

@@ -1,0 +1,11 @@
+allowBuilds:
+  '@astryxdesign/core': true
+  esbuild: true
+  workerd: true
+minimumReleaseAgeExclude:
+  - '@cloudflare/vite-plugin@1.52.1'
+  - '@cloudflare/vitest-pool-workers@0.21.3'
+  - miniflare@5.20260811.1-alpha
+  - wrangler@4.123.0
+  - '@astryxdesign/core@0.4.1'
+  - '@astryxdesign/theme-neutral@0.4.1'
