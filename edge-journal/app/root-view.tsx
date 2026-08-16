@@ -1,12 +1,13 @@
 import { renderToString } from "react-dom/server";
+import type { Context } from "hono";
 import { ReactRefresh, Script, ViteClient } from "vite-ssr-components/react";
 import { serializePage, type PageObject, type RootView } from "@hono/inertia";
 import journalFontUrl from "@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url";
 import { resolvePageMetadata } from "../lib/page-head";
 import { isPublicPage, renderPublicPage } from "./ssr-render";
 
-function clientBody(page: PageObject): string {
-  return `<script data-page="app" type="application/json">${serializePage(page)}</script><div id="app"></div>`;
+function clientBody(page: PageObject, nonce: string): string {
+  return `<script nonce="${nonce}" data-page="app" type="application/json">${serializePage(page)}</script><div id="app"></div>`;
 }
 
 function Document({ page, body }: { page: PageObject; body: string }) {
@@ -35,7 +36,8 @@ function Document({ page, body }: { page: PageObject; body: string }) {
   );
 }
 
-export const rootView: RootView = async (page) => {
-  const body = isPublicPage(page.component) ? await renderPublicPage(page) : clientBody(page);
+export const rootView: RootView = async (page, c: Context<{ Variables: { nonce: string } }>) => {
+  const nonce = c.get("nonce");
+  const body = isPublicPage(page.component) ? await renderPublicPage(page, nonce) : clientBody(page, nonce);
   return `<!DOCTYPE html>${renderToString(<Document page={page} body={body} />)}`;
 };

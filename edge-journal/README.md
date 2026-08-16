@@ -76,23 +76,56 @@ pnpm preview
 pnpm check             # typecheck + test + build
 ```
 
-The seed uses stable unique slugs and `INSERT OR IGNORE`, so running it repeatedly preserves existing rows and does not create duplicates. It does not reset edits made to an existing seed row.
+## Safe operations
+
+Remote commands are explicit and are not part of `pnpm check`. Confirm the target account/database first; these commands mutate or export remote state as noted:
+
+```sh
+pnpm exec wrangler whoami                 # preflight identity
+pnpm db:info                              # inspect D1 metadata
+pnpm db:migrate:remote:status             # read remote migration state
+pnpm db:backup                            # REMOTE EXPORT: timestamped SQL backup
+pnpm db:migrate:remote:apply              # REMOTE MUTATION: apply reviewed migrations
+pnpm exec wrangler d1 time-travel info edge-journal-db # inspect recovery points
+```
+
+Backups go to ignored `backups/`. Rehearse an import against local or staging first and verify row counts and reads; never overwrite production during rehearsal. A production restore is emergency-only and destructively overwrites the target. Confirm the incident decision, take a fresh backup, and choose exactly one deliberate recovery point—never run both commands or copy an example value.
+
+Restore by timestamp:
+
+```sh
+pnpm exec wrangler d1 time-travel restore edge-journal-db --timestamp="<RFC3339_OR_UNIX_TIMESTAMP>"
+```
+
+Or restore by bookmark:
+
+```sh
+pnpm exec wrangler d1 time-travel restore edge-journal-db --bookmark="<BOOKMARK>"
+```
+
+The seed is idempotent and does not reset edited rows.
 
 ## Production setup (instructions only)
 
-No remote resource or secret is created automatically. When explicitly approved, create the database and copy the returned ID into the `database_id` field in `wrangler.jsonc`:
+This Worker combines the public blog and `/admin` in one deployment. Worker-level Access would therefore hide the public blog. Use a hostname/path Access application instead.
 
-```sh
-pnpm exec wrangler d1 create edge-journal-db
+### Preflight and order
+
+1. Confirm an active DNS zone for `<PRODUCTION_HOSTNAME>`, Zero Trust availability, an IdP with MFA (or independent MFA), and permissions to manage Workers, Access, WAF, secrets, and D1. Run `pnpm exec wrangler whoami`, `pnpm db:info`, `pnpm check`, and review every migration.
+2. Before serving the hostname when possible, open **Zero Trust > Access controls > Applications > Create new application > Self-hosted and private > Add public hostname**. Add two protected destinations: `<PRODUCTION_HOSTNAME>/admin` and `<PRODUCTION_HOSTNAME>/admin/*`. The wildcard child path does not cover the parent path.
+3. Access is deny-by-default. Add one **Allow** policy whose Include selector matches only `<ALLOWED_EMAIL_OR_GROUP>`. Do not add a broad email-domain rule unless every account in that domain is trusted. Enable only the intended IdP and use instant authentication when it is the sole IdP.
+4. Require MFA. For an IdP that reports MFA, add **Require > Authentication method > mfa** to the Allow policy. Otherwise enable independent MFA at the organization level and select **Custom MFA settings** for the application or policy. Start with an 8-hour application session and require MFA on each login or use a deliberately bounded MFA session; tune both to the operator's risk tolerance.
+5. In **Workers & Pages > Worker > Settings > Domains & Routes > Add > Custom Domain**, add `<PRODUCTION_HOSTNAME>` and confirm the route points to this Worker. Do not use Worker-level Access here: it would also require authentication for the public blog.
+
+Use this as a template—not a current-state claim—in `wrangler.jsonc`, deliberately substituting the hostname and then rerun `pnpm cf-typegen` and `pnpm check`:
+
+```jsonc
+"workers_dev": false,
+"preview_urls": false,
+"routes": [{ "pattern": "<PRODUCTION_HOSTNAME>", "custom_domain": true }]
 ```
 
-Review migrations before applying them remotely:
-
-```sh
-pnpm exec wrangler d1 migrations apply edge-journal-db --remote
-```
-
-Set secrets interactively so their values do not appear in shell history or source control:
+Do not expose credentials in source control. Set production secrets interactively:
 
 ```sh
 pnpm exec wrangler secret put ADMIN_USERNAME
@@ -100,15 +133,32 @@ pnpm exec wrangler secret put ADMIN_PASSWORD
 pnpm exec wrangler secret put COOKIE_SECRET
 ```
 
-Then regenerate binding types, run the full check, and deploy only with explicit authorization:
+Never copy `.dev.vars` into production or expose secret values in shell history, logs, or CI output. Rotate all three before launch and invalidate the old credentials.
+
+### Rate limiting, deploy, and rollback
+
+In the zone dashboard, open **Security rules > Create rule > Rate limiting rules**. Use the field builder to match hostname `<PRODUCTION_HOSTNAME>` and URI paths beginning with `/admin`. Use IP as the counter characteristic and tune these starting points against real traffic:
+
+- Unsafe mutations with method `POST`, `PATCH`, or `DELETE`: 20 requests/minute/IP, Block for 10 minutes.
+- Optional all-admin safety rule: 120 requests/minute/IP, with a shorter mitigation suitable for interactive use.
+
+Save the rules as drafts first, confirm their match scope, then deploy them. Access remains the primary identity control; rate limiting only limits abuse.
+
+After Access is ready and the custom-domain/`workers_dev`/preview settings have been reviewed, deploy in this order:
 
 ```sh
+pnpm db:migrate:remote:status             # inspect pending migrations
+pnpm db:backup                            # remote export before mutation
+pnpm db:migrate:remote:apply              # REMOTE MUTATION: reviewed migrations only
 pnpm cf-typegen
 pnpm check
-pnpm deploy
+pnpm exec wrangler deploy --dry-run       # inspect; no deployment
+pnpm deploy                               # REMOTE MUTATION
 ```
 
-Production migration and Worker deployment are intentionally separate operational steps.
+Validate public `200` without auth; an admin request gets the Access challenge before Basic Auth; an authorized MFA user then passes Basic Auth; an unauthorized identity is denied; workers.dev/preview URLs cannot bypass controls; CSP and `private, no-store` are present; CRUD and restore work; logs contain expected request/error events without secrets; and a backup is readable. Keep the prior Worker version. If needed, inspect `pnpm exec wrangler versions list` and roll back with `pnpm exec wrangler rollback` to a known-good version. Roll back the Worker before reversing a migration unless the migration is backward-compatible. Rehearse D1 restore locally or in staging.
+
+Official references: [Custom Domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/), [Cloudflare Access](https://developers.cloudflare.com/workers/configuration/cloudflare-access/), [Access application paths](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/app-paths/), [MFA requirements](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/mfa-requirements/), [zone rate limiting](https://developers.cloudflare.com/waf/rate-limiting-rules/create-zone-dashboard/), and [D1 Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/).
 
 ## Routes and pages
 
@@ -164,8 +214,8 @@ Hono Basic Auth protects `/admin` and `/admin/*` using Worker secrets. It is int
 
 Hono CSRF middleware checks `Origin` / Fetch Metadata for unsafe requests with browser form content types (`application/x-www-form-urlencoded`, `multipart/form-data`, and `text/plain`). Inertia may submit JSON, so a small complementary middleware checks `Origin` and `Sec-Fetch-Site` on all unsafe requests. Cross-origin JSON also requires a browser preflight, and this same-origin app enables no CORS. Direct non-browser clients without these browser headers must still provide Basic Auth.
 
-Article bodies are escaped React text rendered with `white-space: pre-wrap`; `dangerouslySetInnerHTML` is used only for `serializePage()` inside the document-shell JSON script, as required by `@hono/inertia`. Generic error pages expose neither stack traces nor database rows, and structured server logs contain only the request ID and error class.
+Article bodies are escaped React text rendered with `white-space: pre-wrap`; `dangerouslySetInnerHTML` is used only for `serializePage()` inside the document-shell JSON script, as required by `@hono/inertia`. A per-request nonce authorizes that bootstrap script under the production Content Security Policy. Admin responses are `private, no-store`, generic error pages expose neither stack traces nor database rows, and structured logs record only request IDs, event names, post IDs, and error classes—never post content or credentials.
 
 Astryx improves consistency and accessibility coverage but increases the client CSS and component bundle compared with the original plain-CSS implementation. The current code uses per-component subpath imports.
 
-Before evolving this demo into a production product, add an external identity provider or hardened rotating sessions, login and mutation rate limits, CSP tailored to deployed assets, secret rotation, audit logs, backup/restore procedures, a soft-delete retention and purge policy, observability alerts, accessibility testing, pagination abuse limits, and a staged migration/deployment process.
+The production controls and validation sequence are documented in [Production setup](#production-setup-instructions-only). Longer-term hardening still includes a soft-delete retention and purge policy, optimistic edit-conflict detection, accessibility testing, and pagination abuse limits.

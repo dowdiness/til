@@ -47,7 +47,7 @@ function toInertiaPage(page: PageObject): Page {
   };
 }
 
-export async function renderPublicPage(page: PageObject): Promise<string> {
+export async function renderPublicPage(page: PageObject, nonce: string): Promise<string> {
   const result = await createInertiaApp({
     page: toInertiaPage(page),
     render: renderToString,
@@ -60,5 +60,7 @@ export async function renderPublicPage(page: PageObject): Promise<string> {
     ),
   });
 
-  return result.body;
+  const bootstrap = '<script data-page="app"';
+  if (!result.body.includes(bootstrap)) throw new Error("Public SSR output is missing the Inertia bootstrap script");
+  return result.body.replace(bootstrap, `<script nonce="${nonce}" data-page="app"`);
 }

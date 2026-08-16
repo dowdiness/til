@@ -13,6 +13,10 @@
     "cf-typegen": "wrangler types --env-interface CloudflareBindings worker-configuration.d.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply edge-journal-db --local",
+    "db:migrate:remote:status": "wrangler d1 migrations list edge-journal-db --remote",
+    "db:migrate:remote:apply": "wrangler d1 migrations apply edge-journal-db --remote",
+    "db:info": "wrangler d1 info edge-journal-db",
+    "db:backup": "node scripts/backup-d1.mjs",
     "db:seed:local": "wrangler d1 execute edge-journal-db --local --file=drizzle/seed.sql",
     "deploy": "vite build && wrangler deploy"
   },

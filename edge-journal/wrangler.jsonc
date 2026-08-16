@@ -14,7 +14,7 @@
 		{
 			"binding": "DB",
 			"database_name": "edge-journal-db",
-			"database_id": "00000000-0000-0000-0000-000000000000",
+			"database_id": "fc8bbf77-246d-4030-abbf-03f2345d1134",
 			"migrations_dir": "drizzle/migrations"
 		}
 	]

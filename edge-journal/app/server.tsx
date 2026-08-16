@@ -18,17 +18,33 @@ import { noticeRedirect } from "../lib/redirect";
 import { sameOriginMutation } from "../lib/request";
 import { NotFoundError } from "../lib/errors";
 import { loadAdminSearchParams, loadPublicSearchParams } from "../lib/search-params";
+import { contentSecurityPolicy, requestNonce } from "../lib/security-policy";
 
-const app = new Hono<{ Bindings: CloudflareBindings; Variables: { requestId: string } }>();
+type AppEnv = { Bindings: CloudflareBindings; Variables: { requestId: string; nonce: string } };
+const app = new Hono<AppEnv>();
 
 app.use("*", honoRequestId());
+app.use("*", async (c, next) => {
+  c.set("nonce", requestNonce());
+  await next();
+  c.res.headers.set("Content-Security-Policy", contentSecurityPolicy({ nonce: c.get("nonce"), development: import.meta.env.MODE === "development" }));
+});
 app.use("*", secureHeaders());
 app.use("*", (c, next) => import.meta.env.DEV ? logger()(c, next) : next());
 app.use("*", inertia({ version: APP_VERSION, rootView }));
 app.use("*", csrf());
 app.use("*", sameOriginMutation);
 
-const adminAuth: MiddlewareHandler<{ Bindings: CloudflareBindings; Variables: { requestId: string } }> = (c, next) =>
+const adminNoCache: MiddlewareHandler<AppEnv> = async (c, next) => {
+  await next();
+  c.res.headers.set("Cache-Control", "private, no-store, max-age=0");
+  c.res.headers.set("Pragma", "no-cache");
+  c.res.headers.set("Expires", "0");
+};
+app.use("/admin", adminNoCache);
+app.use("/admin/*", adminNoCache);
+
+const adminAuth: MiddlewareHandler<AppEnv> = (c, next) =>
   basicAuth({
     realm: "Edge Journal admin",
     username: c.env.ADMIN_USERNAME,
@@ -38,6 +54,9 @@ app.use("/admin", adminAuth);
 app.use("/admin/*", adminAuth);
 
 function secret(c: { env: CloudflareBindings }): string { return c.env.COOKIE_SECRET; }
+function audit(c: { get(key: "requestId"): string | undefined }, event: string, postId: number): void {
+  console.log(JSON.stringify({ level: "info", event, requestId: c.get("requestId") ?? "unknown", postId }));
+}
 function numberParam(value: string): number | null { const parsed = Number(value); return Number.isInteger(parsed) && parsed > 0 ? parsed : null; }
 function withStatus(response: Response, status: number): Response { return new Response(response.body, { status, headers: response.headers }); }
 
@@ -96,6 +115,7 @@ const routes = app.get("/", async (c) => {
   if (result.kind === "slug-conflict") {
     return noticeRedirect(c, secret(c), "/admin/posts/new", { errors: { slug: "This slug is already in use." } });
   }
+  audit(c, "admin.post.created", result.post.id);
   return noticeRedirect(c, secret(c), "/admin/posts", { flash: "Post created." });
 })
 .patch("/admin/posts/:id", async (c) => {
@@ -109,18 +129,21 @@ const routes = app.get("/", async (c) => {
   if (result.kind === "slug-conflict") {
     return noticeRedirect(c, secret(c), `/admin/posts/${id}/edit`, { errors: { slug: "This slug is already in use." } });
   }
+  audit(c, "admin.post.updated", result.post.id);
   return noticeRedirect(c, secret(c), "/admin/posts", { flash: "Post updated." });
 })
 .delete("/admin/posts/:id", async (c) => {
   const id = numberParam(c.req.param("id"));
   const deleted = id === null ? null : await deletePost(c.env.DB, id, Date.now());
   if (!deleted) throw new NotFoundError();
+  audit(c, "admin.post.deleted", deleted.id);
   return c.redirect(`/admin/posts?undo=${deleted.id}`, 303);
 })
 .post("/admin/posts/:id/restore", async (c) => {
   const id = numberParam(c.req.param("id"));
   const restored = id === null ? null : await restorePost(c.env.DB, id);
   if (!restored) throw new NotFoundError();
+  audit(c, "admin.post.restored", restored.id);
   return noticeRedirect(c, secret(c), "/admin/posts", { flash: `“${restored.title}” restored.` });
 });
 

@@ -70,6 +70,16 @@ describe("Edge Journal integration", () => {
     const html = await response.text();
 
     expect(response.status).toBe(200);
+    const csp = response.headers.get("Content-Security-Policy") ?? "";
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("base-uri 'self'");
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("upgrade-insecure-requests");
+    const nonce = csp.match(/'nonce-([^']+)'/)?.[1];
+    expect(nonce).toBeTruthy();
+    expect(response.headers.get("Cache-Control") ?? "").not.toContain("no-store");
+    expect(html).toContain(`nonce="${nonce}" data-page="app" type="application/json"`);
     expect(html).toContain('data-page="app"');
     expect(html).toContain('data-server-rendered="true"');
     expect(html).toContain('"component":"Posts\\/Index"');
@@ -191,13 +201,26 @@ describe("Edge Journal integration", () => {
   });
 
   it("requires Basic Auth and keeps the authenticated admin on the CSR shell", async () => {
-    expect((await request("/admin/posts")).status).toBe(401);
+    const unauthenticated = await request("/admin/posts");
+    expect(unauthenticated.status).toBe(401);
+    expect(unauthenticated.headers.get("Cache-Control")).toBe("private, no-store, max-age=0");
+    expect(unauthenticated.headers.get("Pragma")).toBe("no-cache");
+    expect(unauthenticated.headers.get("Expires")).toBe("0");
 
     const response = await request("/admin/posts", { headers: { Authorization: auth } });
     const html = await response.text();
     expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store, max-age=0");
+    const nonce = response.headers.get("Content-Security-Policy")?.match(/'nonce-([^']+)'/)?.[1];
+    expect(nonce).toBeTruthy();
+    expect(html).toContain(`nonce="${nonce}" data-page="app" type="application/json"`);
     expect(html).toContain('data-page="app"');
     expect(html).not.toContain('data-server-rendered="true"');
+
+    const second = await request("/admin/posts", { headers: { Authorization: auth } });
+    const secondNonce = second.headers.get("Content-Security-Policy")?.match(/'nonce-([^']+)'/)?.[1];
+    expect(secondNonce).toBeTruthy();
+    expect(secondNonce).not.toBe(nonce);
   });
 
   it("filters the admin list by query and status", async () => {
