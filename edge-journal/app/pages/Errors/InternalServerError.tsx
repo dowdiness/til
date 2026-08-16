@@ -4,7 +4,7 @@ import { Head } from "@inertiajs/react";
 
 export default function InternalServerError() {
   return (
-    <main className="error-page">
+    <main className="grid min-h-screen place-items-center bg-body p-6">
       <Head title="Something went wrong" />
       <EmptyState
         title="Something went wrong"

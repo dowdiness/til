@@ -4,7 +4,7 @@ import { Head } from "@inertiajs/react";
 
 export default function NotFound() {
   return (
-    <main className="error-page">
+    <main className="grid min-h-screen place-items-center bg-body p-6">
       <Head title="Not found" />
       <EmptyState
         title="This page could not be found"

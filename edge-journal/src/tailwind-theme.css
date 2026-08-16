@@ -1,0 +1,96 @@
+/* Edge Journal's application-facing design system. Astryx owns runtime values;
+ * Tailwind exposes the semantic authoring vocabulary used by page layouts. */
+
+@custom-variant coarse {
+  @media (hover: none), (pointer: coarse) {
+    @slot;
+  }
+}
+
+@theme {
+  --breakpoint-mobile: 31.25rem;
+  --breakpoint-narrow: 43.75rem;
+
+  --container-shell: 44rem;
+  --container-page: 40rem;
+  --container-reading: 42rem;
+  --container-form-copy: 38rem;
+  --container-lead: 62ch;
+  --container-prose: 66ch;
+  --container-title: 24ch;
+
+  --spacing-entry: 0.85rem;
+  --spacing-result-x: 0.65rem;
+  --spacing-result-y: 0.35rem;
+  --spacing-action-edge: 0.45rem;
+  --spacing-footer-gap: 0.55rem;
+  --spacing-row: 0.8rem;
+  --spacing-row-rule: 0.35rem;
+  --spacing-leader-shift: 0.18rem;
+  --spacing-micro: 0.15rem;
+  --spacing-header-block: clamp(3.75rem, 9vw, 5.5rem);
+  --spacing-footer-block: clamp(6rem, 15vw, 9rem);
+  --spacing-content-min: 56vh;
+
+  --grid-template-columns-ledger: minmax(0, 1fr) auto;
+  --grid-template-columns-filters: minmax(13rem, 2fr) minmax(9.5rem, 1fr) auto;
+
+  --transition-property-focus: opacity, transform;
+  --transition-duration-fast-min: var(--duration-fast-min);
+  --transition-duration-fast-max: var(--duration-fast-max);
+
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.5;
+  --text-supporting: 0.75rem;
+  --text-supporting--line-height: 1.5;
+  --text-entry-title: 0.9375rem;
+  --text-entry-title--line-height: 1.45;
+  --text-lead: 1.0625rem;
+  --text-lead--line-height: 1.7;
+  --text-article: 1rem;
+  --text-article--line-height: 1.8;
+
+  --animate-ledger-entry: ledger-entry-in var(--duration-fast) var(--ease-out) both;
+  --animate-ledger-fade: ledger-entry-fade var(--duration-fast-min) var(--ease-out) both;
+}
+
+@theme inline {
+  --color-heading: var(--color-text-heading);
+  --color-interactive: var(--color-text-interactive);
+  --color-focus: var(--color-focus-ring);
+  --color-touch-decoration: var(--color-touch-decoration);
+  --color-divider: var(--color-divider);
+  --color-lead: var(--color-text-lead);
+  --color-rule: var(--color-rule);
+  --color-rule-strong: var(--color-rule-strong);
+  --color-destructive: var(--color-action-destructive);
+  --color-published: var(--color-status-published);
+  --color-draft: var(--color-status-draft);
+  --color-unsaved: var(--color-background-unsaved);
+}
+
+@utility journal-frame {
+  width: min(calc(100% - 2rem), var(--container-shell));
+  min-height: 100vh;
+  margin-inline: auto;
+  padding-block: max(2.5rem, env(safe-area-inset-top)) max(2rem, env(safe-area-inset-bottom));
+
+  @media (width <= 43.75rem) {
+    width: min(calc(100% - 1.875rem), var(--container-shell));
+    padding-top: max(2.25rem, env(safe-area-inset-top));
+  }
+}
+
+@keyframes ledger-entry-in {
+  from {
+    opacity: 0;
+    filter: blur(var(--focus-blur-entry));
+    transform: translateY(4px);
+  }
+}
+
+@keyframes ledger-entry-fade {
+  from {
+    opacity: 0;
+  }
+}

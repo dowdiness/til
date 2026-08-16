@@ -1,4 +1,5 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
+import tailwindcss from "@tailwindcss/vite";
 import { astryxStylex, LIGHTNINGCSS_TARGETS } from "@astryxdesign/build/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -21,6 +22,7 @@ function createAstryxPlugins(command: "build" | "serve") {
 export default defineConfig(({ command }) => ({
   plugins: [
     inertiaPages(),
+    tailwindcss(),
     ...createAstryxPlugins(command),
     cloudflare(),
     ssrPlugin(),

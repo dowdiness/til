@@ -14,6 +14,7 @@ All direct dependencies are pinned in `package.json` and `pnpm-lock.yaml`:
 - React / React DOM 19.2.8 — selective public-page SSR, hydration, browser page components, and the document shell
 - Astryx Core 0.4.1, Astryx Neutral 0.4.1, and StyleX 0.19.0 — accessible UI components, theme tokens, and the visual system; production compiles Astryx source via `@astryxdesign/build/vite` with StyleX tree-shaking
 - `@astryxdesign/build` 0.4.1, `@stylexjs/unplugin` 0.19.0, `@stylexjs/babel-plugin` 0.19.0, and `@babel/core` 7.28.5 — Astryx source-build pipeline and StyleX compilation
+- Tailwind CSS and `@tailwindcss/vite` 4.3.3 — the configured application design system for frame, region, responsive, spacing, typography, and row layout utilities
 - IBM Plex Sans Variable 5.3.0 — self-hosted Latin variable font for editorial and interface typography
 - `@cloudflare/vite-plugin` 1.52.1, Vite 8.2.1, and `vite-ssr-components` 0.6.1 — workerd-based development plus correct development/production asset tags
 - Drizzle ORM 0.45.2 and Drizzle Kit 0.31.10 — typed D1 queries and generated SQLite migrations; both are stable releases
@@ -28,11 +29,11 @@ Inertia lets each Hono GET route pass DTOs directly as page props and currently 
 
 Astryx supplies the current UI components and theme. Production compiles Astryx TypeScript and app-authored StyleX via `@astryxdesign/build/vite`, emitting styles for imported components and overrides. Development keeps Astryx on its pre-built component CSS via `src/astryx-dev.css` while the same plugin compiles app-authored StyleX without aliasing Astryx to source. Astryx reset and Neutral theme remain built/static in both modes.
 
-Component-facing overrides are co-located in `app/styles` and passed through Astryx `xstyle`; raw pagination slots use `stylex.props`. Global CSS remains responsible for document and browser surfaces, descendant input sizing, View Transition pseudo-elements, and dialog backdrops. Two narrowly scoped unlayered rules bridge Astryx production atoms for the dialog closing state and destructive button color without raising declaration priority.
+Styling has one owner per concern. Astryx owns component behavior and runtime theme variables, with Edge Journal's Neutral-theme customization isolated in `src/astryx-theme.css`. Tailwind is the application-facing design system: `src/tailwind-theme.css` maps named content budgets and responsive contracts onto Astryx's official Tailwind bridge and supplies the utility vocabulary used directly by page regions. StyleX in `app/styles/astryx-overrides.stylex.ts` is restricted to Astryx `xstyle` overrides. `src/styles.css` owns browser/document surfaces such as the font face, View Transition pseudo-elements, dialog backdrop, accessibility preferences, and the narrow Astryx integration boundary. No application layout selectors remain in global CSS.
 
 `app/inertia-app.tsx` shares the Astryx `Theme` and `LinkProvider` wrapper between public SSR and browser hydration. `src/client.tsx` boots that shared tree. The provider delegates ordinary Astryx links and link-shaped buttons to `@inertiajs/react` rather than replacing Inertia navigation. Advanced links that need partial reload or hover prefetch continue to use Inertia `Link` directly, styled with Astryx tokens.
 
-The interface uses Astryx `Button`, `TextInput`, `TextArea`, `Selector`, `Banner`, `Stack`, `Heading`, `Text`, and `EmptyState`. Astryx Neutral is customized into a light-only, card-free publication ledger: subtly grained paper-white surfaces, graphite typography, dotted leaders, near-square controls, and a centered 44rem column. A bounded focus-pull language uses blur for ledger arrival, article View Transitions, and the translucent search plane while keeping active text sharp. Devices reporting limited memory or concurrency, Save-Data, reduced transparency, or reduced motion receive progressively lighter effects. A preloaded, self-hosted IBM Plex Sans variable font drives both Astryx and editorial typography with a compact role-based scale. Public pages prioritize quiet reading and scanning; administration reuses the same visual grammar while remaining task-focused. The design takes structural inspiration from unvalley.me. See `DESIGN.md` for the current visual system.
+The interface uses Astryx `Button`, `Icon`, `IconButton`, `TextInput`, `TextArea`, `Selector`, `FormLayout`, `Dialog`, `Pagination`, `Banner`, `Heading`, `Text`, and `EmptyState`. Astryx Neutral is customized into a light-only, card-free publication ledger: subtly grained paper-white surfaces, graphite typography, dotted leaders, near-square controls, and a centered 44rem column. A bounded focus-pull language uses blur for ledger arrival, article View Transitions, and the translucent search plane while keeping active text sharp. Devices reporting limited memory or concurrency, Save-Data, reduced transparency, or reduced motion receive progressively lighter effects. A preloaded, self-hosted IBM Plex Sans variable font drives both Astryx and editorial typography with a compact role-based scale. Public pages prioritize quiet reading and scanning; administration reuses the same visual grammar while remaining task-focused. The design takes structural inspiration from unvalley.me. See `DESIGN.md` for the current visual system.
 
 ## Required local values
 
@@ -128,9 +129,11 @@ Production migration and Worker deployment are intentionally separate operationa
 - `app/server.tsx` — Hono middleware and thin routes
 - `app/root-view.tsx` — React document shell that selects public SSR or a CSR body and emits Vite assets
 - `app/pages` and `app/components` — typed Inertia pages and shared UI
-- `app/styles` — app-authored StyleX overrides passed through Astryx `xstyle`
+- `app/styles` — Astryx-only StyleX overrides plus static, extraction-safe Tailwind variant maps
 - `app/pages.gen.ts` — generated by `inertiaPages()`
-- `src/client.tsx` and `src/styles.css` — Astryx providers, pre-built theme imports, and global editorial/browser styling
+- `src/astryx-theme.css` — Edge Journal's Astryx Neutral runtime-token customization
+- `src/tailwind.css`, `src/tailwind-reset.css`, and `src/tailwind-theme.css` — Tailwind layer entry, default-theme reset, Astryx token bridge, application budgets, and semantic design tokens
+- `src/client.tsx` and `src/styles.css` — browser entry plus global document, View Transition, accessibility, and Astryx integration styling
 - `domain` — Valibot validation and the pure publication timestamp transition
 - `db` — request-scoped `drizzle(c.env.DB)` construction, explicit DTO mapping, and purpose-specific queries/commands
 - `drizzle/migrations` and `drizzle/seed.sql` — generated schema history and idempotent fixtures

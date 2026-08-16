@@ -43,7 +43,7 @@ function AdminPostFilterFields() {
   };
 
   return (
-    <form className="admin-filters" role="search" aria-busy={isFiltering} onSubmit={submit}>
+    <form className="mb-15 grid grid-cols-filters items-end gap-3 border-b border-dotted border-rule pb-8 max-narrow:grid-cols-1 max-narrow:items-stretch contrast-more:border-solid contrast-more:border-secondary" role="search" aria-busy={isFiltering} onSubmit={submit}>
       <TextInput
         label="Search posts"
         value={filterQuery}
@@ -80,7 +80,7 @@ function AdminPostFilterFields() {
         isLoading={isFiltering}
         width="100%"
       />
-      <div className="filter-actions">
+      <div className="flex min-h-8 flex-wrap items-center gap-3 max-mobile:flex-col max-mobile:items-start">
         {filterQuery || filterStatus !== "all" ? (
           <Button
             type="button"
@@ -88,6 +88,7 @@ function AdminPostFilterFields() {
             variant="ghost"
             isLoading={isFiltering}
             isInterruptible
+            xstyle={astryxOverrides.compactAction}
             onClick={clearFilters}
           />
         ) : null}

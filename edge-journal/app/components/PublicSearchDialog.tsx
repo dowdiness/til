@@ -1,6 +1,7 @@
 import { Button } from "@astryxdesign/core/Button";
 import { Dialog } from "@astryxdesign/core/Dialog";
 import { Heading } from "@astryxdesign/core/Heading";
+import { Icon } from "@astryxdesign/core/Icon";
 import { IconButton } from "@astryxdesign/core/IconButton";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -22,23 +23,6 @@ type SearchFormProps = {
   onSubmit: (query: string | undefined) => void;
 };
 
-function SearchIcon() {
-  return (
-    <svg aria-hidden="true" className="search-icon" focusable="false" viewBox="0 0 24 24">
-      <circle cx="10.75" cy="10.75" r="6.25" />
-      <path d="m15.4 15.4 4.1 4.1" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg aria-hidden="true" className="close-icon" focusable="false" viewBox="0 0 24 24">
-      <path d="M6 6l12 12M18 6 6 18" />
-    </svg>
-  );
-}
-
 function SearchForm({ query, isSearching, onClose, onSubmit }: SearchFormProps) {
   const [searchQuery, setSearchQuery] = useState(query);
 
@@ -49,19 +33,19 @@ function SearchForm({ query, isSearching, onClose, onSubmit }: SearchFormProps) 
   };
 
   return (
-    <form onSubmit={submit} role="search" className="search-dialog-form" aria-busy={isSearching}>
-      <div className="search-dialog-heading">
-        <Heading level={2}>Search notes</Heading>
+    <form onSubmit={submit} role="search" className="grid gap-4" aria-busy={isSearching}>
+      <div className="flex items-center justify-between gap-6 border-b border-dotted border-rule pb-3">
+        <Heading level={2} xstyle={astryxOverrides.searchDialogHeading}>Search notes</Heading>
         <IconButton
           type="button"
           label="Close search"
-          icon={<CloseIcon />}
+          icon={<Icon icon="close" size="sm" />}
           variant="ghost"
           xstyle={astryxOverrides.iconButton}
           onClick={onClose}
         />
       </div>
-      <Text type="supporting" color="secondary" as="p">
+      <Text type="supporting" color="secondary" as="p" xstyle={astryxOverrides.searchDialogHelp}>
         Find a note by title or summary.
       </Text>
       <TextInput
@@ -70,19 +54,20 @@ function SearchForm({ query, isSearching, onClose, onSubmit }: SearchFormProps) 
         value={searchQuery}
         onChange={setSearchQuery}
         placeholder="Title or summary"
-        startIcon={<SearchIcon />}
+        startIcon={<Icon icon="search" size="sm" />}
         hasAutoFocus
         hasClear
         width="100%"
         xstyle={astryxOverrides.touchTextInput}
       />
-      <div className="search-dialog-actions">
+      <div className="flex justify-end pt-1 max-narrow:[&>button]:w-full">
         <Button
           type="submit"
           label="Search"
           variant="primary"
           isLoading={isSearching}
           isInterruptible
+          xstyle={astryxOverrides.compactAction}
         />
       </div>
     </form>
@@ -126,7 +111,7 @@ export function PublicSearchDialog({ query, isSearching, onSearch }: Props) {
         ref={searchTriggerRef}
         type="button"
         label={query ? `Search notes. Current search: ${query}` : "Search notes"}
-        icon={<SearchIcon />}
+        icon={<Icon icon="search" size="sm" />}
         variant="ghost"
         xstyle={[
           astryxOverrides.iconButton,

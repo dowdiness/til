@@ -1,0 +1,12 @@
+@layer reset, theme, base, astryx-base, astryx-theme, product, app, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "./tailwind-reset.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "@astryxdesign/core/reset.css";
+@import "@astryxdesign/theme-neutral/theme.css";
+@import "./astryx-theme.css";
+@import "@astryxdesign/core/tailwind-theme.css";
+@import "./tailwind-theme.css";
+@import "./styles.css";
+@import "tailwindcss/utilities.css" layer(utilities);

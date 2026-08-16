@@ -1,0 +1,55 @@
+/* Edge Journal's Astryx runtime-theme customization. Astryx remains the
+ * source of truth; Tailwind aliases these variables without copying values. */
+
+@layer astryx-theme {
+  [data-astryx-theme="neutral"] {
+    --color-background-body: #fafafa;
+    --color-background-surface: #fafafa;
+    --color-background-card: #ffffff;
+    --color-background-muted: #f3f3f3;
+    --color-accent: #171717;
+    --color-accent-muted: #ededed;
+    --color-text-primary: #414141;
+    --color-text-secondary: #737373;
+    --color-text-accent: #171717;
+    --color-text-placeholder: #737373;
+    --color-border: #dedede;
+    --color-border-emphasized: #ababab;
+    --color-text-heading: #242424;
+    --color-text-interactive: #111111;
+    --color-focus-ring: #171717;
+    --color-touch-decoration: #a3a3a3;
+    --color-divider: #8b8b8b;
+    --color-text-lead: #555555;
+    --color-rule: #d4d4d4;
+    --color-rule-strong: #b8b8b8;
+    --color-action-destructive: #963a3a;
+    --color-status-published: #2f6645;
+    --color-status-draft: #6f6f6f;
+    --color-background-unsaved: #f5f5f5;
+    --font-family-journal: "IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-family-body: var(--font-family-journal);
+    --font-family-heading: var(--font-family-journal);
+    --radius-element: 0.25rem;
+    --radius-container: 0.35rem;
+    --ease-standard: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-out: var(--ease-standard);
+    --radius-page: 0;
+    min-height: 100vh;
+    color: var(--color-text-primary);
+    background-color: var(--color-background-body);
+    background-image: url("/paper-grain.png");
+    background-repeat: repeat;
+    background-size: 96px 96px;
+  }
+}
+
+@media (prefers-contrast: more) {
+  @layer astryx-theme {
+    [data-astryx-theme="neutral"] {
+      --color-text-secondary: #5f5f5f;
+      --color-border: #737373;
+      --color-border-emphasized: #414141;
+    }
+  }
+}

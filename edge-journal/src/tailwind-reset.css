@@ -1,0 +1,4 @@
+/* Tailwind is a configured design system, not its default visual theme. */
+@theme {
+  --*: initial;
+}

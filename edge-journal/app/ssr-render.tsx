@@ -2,7 +2,7 @@ import type { Page } from "@inertiajs/core";
 import { createInertiaApp, type ResolvedComponent } from "@inertiajs/react";
 import { renderToString } from "react-dom/server";
 import type { PageObject } from "@hono/inertia";
-import { AppShell } from "./inertia-app";
+import { AppProviders } from "./inertia-app";
 
 const publicPages: Record<string, () => Promise<{ default: ResolvedComponent }>> = {
   "Posts/Index": () => import("./pages/Posts/Index"),
@@ -54,9 +54,9 @@ export async function renderPublicPage(page: PageObject): Promise<string> {
     resolve: resolvePublicPage,
     serverHead: true,
     setup: ({ App, props }) => (
-      <AppShell>
+      <AppProviders>
         <App {...props} />
-      </AppShell>
+      </AppProviders>
     ),
   });
 

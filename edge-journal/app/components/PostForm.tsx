@@ -1,6 +1,6 @@
 import { Button } from "@astryxdesign/core/Button";
+import { FormLayout } from "@astryxdesign/core/FormLayout";
 import { Selector } from "@astryxdesign/core/Selector";
-import { Stack } from "@astryxdesign/core/Stack";
 import { Text } from "@astryxdesign/core/Text";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { TextInput } from "@astryxdesign/core/TextInput";
@@ -96,8 +96,8 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
   };
 
   return (
-    <form onSubmit={submit} noValidate className="post-form">
-      <Stack gap={5}>
+    <form onSubmit={submit} noValidate className="border-t border-dotted border-rule pt-8 contrast-more:border-solid contrast-more:border-secondary">
+      <FormLayout>
         <TextInput
           label="Title"
           description="A clear title, up to 120 characters."
@@ -180,7 +180,7 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
             Unsaved changes are remembered in this browser history entry.
           </Text>
         ) : null}
-        <div className="form-actions">
+        <div className="flex flex-wrap items-center gap-3 pt-2 max-mobile:flex-col max-mobile:items-start">
           <Button
             type="submit"
             label={action === "create" ? "Create post" : "Save changes"}
@@ -191,7 +191,7 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
           />
           <Button label="Cancel" href="/admin/posts" variant="ghost" size="lg" />
         </div>
-      </Stack>
+      </FormLayout>
     </form>
   );
 }

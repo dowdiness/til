@@ -15,9 +15,9 @@ export default function Show({ post, flash }: Props) {
       <Head title={post.title}>
         <meta head-key="description" name="description" content={post.excerpt} />
       </Head>
-      <article className="article-page">
-        <header className="article-header">
-          <Text type="supporting" color="secondary" as="p">
+      <article className="mx-auto max-w-reading">
+        <header className="pb-8">
+          <Text type="supporting" color="secondary" as="p" xstyle={astryxOverrides.articleMeta}>
             <time dateTime={post.publishedAt}>{publishedDate(post.publishedAt, "long")}</time>
           </Text>
           <Heading
@@ -28,11 +28,11 @@ export default function Show({ post, flash }: Props) {
           >
             {post.title}
           </Heading>
-          <Text type="large" color="secondary" as="p">{post.excerpt}</Text>
+          <Text type="large" color="secondary" as="p" xstyle={astryxOverrides.articleLead}>{post.excerpt}</Text>
         </header>
-        <div className="article-divider" aria-hidden="true" />
-        <pre className="article-body">{post.body}</pre>
-        <footer className="article-footer">
+        <div className="mb-11 h-px w-12 bg-divider" aria-hidden="true" />
+        <pre className="m-0 max-w-prose whitespace-pre-wrap text-pretty wrap-anywhere font-sans text-article text-primary">{post.body}</pre>
+        <footer className="mt-16 border-t border-dotted border-rule pt-4 text-sm contrast-more:border-solid contrast-more:border-secondary">
           <Link href="/" isStandalone hasUnderline>Back to the journal</Link>
         </footer>
       </article>

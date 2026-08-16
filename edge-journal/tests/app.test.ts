@@ -79,6 +79,33 @@ describe("Edge Journal integration", () => {
     expect(html).toContain('<title data-inertia="">Journal</title>');
   });
 
+  it("server-renders Astryx pagination when the journal spans multiple pages", async () => {
+    const insert = env.DB.prepare("INSERT INTO posts (title, slug, excerpt, body, status, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    const timestamp = 1609459200000;
+    await env.DB.batch(Array.from({ length: 5 }, (_, index) => insert.bind(
+      `Pagination fixture ${index + 1}`,
+      `pagination-fixture-${index + 1}`,
+      "Pagination fixture excerpt",
+      "Pagination fixture body",
+      "published",
+      timestamp - index,
+      timestamp - index,
+      timestamp - index,
+    )));
+
+    try {
+      const response = await request("/");
+      const html = await response.text();
+
+      expect(response.status).toBe(200);
+      expect(html).toContain('aria-label="Journal pagination"');
+      expect(html).toContain("Page 1 of 2");
+      expect(html).toContain('aria-label="Go to next page"');
+    } finally {
+      await env.DB.prepare("DELETE FROM posts WHERE slug LIKE 'pagination-fixture-%'").run();
+    }
+  });
+
   it("server-renders published article content", async () => {
     const response = await request("/posts/published-one");
     const html = await response.text();

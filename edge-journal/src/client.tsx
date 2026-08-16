@@ -1,6 +1,6 @@
 import { createInertiaApp, type ResolvedComponent } from "@inertiajs/react";
 import { withApp } from "../app/inertia-app";
-import "./styles.css";
+import "./tailwind.css";
 
 if (import.meta.env.DEV) {
   await import("./astryx-dev.css");
