@@ -1,5 +1,5 @@
 import { Head, router } from "@inertiajs/react";
-import { useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Layout } from "../../components/Layout";
 import { PublicLedger } from "../../components/PublicLedger";
 import { PublicSearchDialog } from "../../components/PublicSearchDialog";
@@ -13,7 +13,21 @@ const partialProps = ["posts", "query", "errors", "flash"];
 
 export default function Index({ posts, query, flash }: Props) {
   const [isSearching, setIsSearching] = useState(false);
+  const [isOpeningPost, setIsOpeningPost] = useState(false);
   const visitCounter = useRef(0);
+  const openingStatusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const finishOpeningPost = () => {
+    if (openingStatusTimer.current !== null) {
+      clearTimeout(openingStatusTimer.current);
+      openingStatusTimer.current = null;
+    }
+    setIsOpeningPost(false);
+  };
+
+  useEffect(() => () => {
+    if (openingStatusTimer.current !== null) clearTimeout(openingStatusTimer.current);
+  }, []);
 
   const visit = (nextQuery: string | undefined, onSuccess?: () => void) => {
     const visitId = ++visitCounter.current;
@@ -36,26 +50,39 @@ export default function Index({ posts, query, flash }: Props) {
     if (!(event.currentTarget instanceof HTMLElement)) return;
 
     const isModifiedClick = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey;
-    const shouldTransition =
-      event.detail > 0 &&
-      event.button === 0 &&
-      !isModifiedClick &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
-      "startViewTransition" in document;
-
-    if (!shouldTransition) return;
+    if (event.button !== 0 || isModifiedClick) return;
 
     event.preventDefault();
+    openingStatusTimer.current = setTimeout(() => setIsOpeningPost(true), 150);
+
     const source = event.currentTarget;
-    const cleanup = () => source.style.removeProperty("view-transition-name");
-    source.style.setProperty("view-transition-name", "article-title");
+    const shouldTransition =
+      event.detail > 0 &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+      "startViewTransition" in document;
+    const cleanupTransition = () => source.style.removeProperty("view-transition-name");
+    const finish = () => {
+      cleanupTransition();
+      finishOpeningPost();
+    };
+
+    if (shouldTransition) {
+      source.style.setProperty("view-transition-name", "article-title");
+      router.visit(href, {
+        viewTransition: (transition) => {
+          void transition.finished.finally(cleanupTransition);
+        },
+        onCancel: finish,
+        onError: finish,
+        onFinish: finishOpeningPost,
+      });
+      return;
+    }
 
     router.visit(href, {
-      viewTransition: (transition) => {
-        void transition.finished.finally(cleanup);
-      },
-      onCancel: cleanup,
-      onError: () => cleanup(),
+      onCancel: finishOpeningPost,
+      onError: finishOpeningPost,
+      onFinish: finishOpeningPost,
     });
   };
 
@@ -79,6 +106,7 @@ export default function Index({ posts, query, flash }: Props) {
         posts={posts}
         query={query}
         isSearching={isSearching}
+        isOpeningPost={isOpeningPost}
         onClear={() => void visit(undefined)}
         onOpenPost={openPost}
       />

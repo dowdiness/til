@@ -114,6 +114,8 @@ describe("Edge Journal integration", () => {
     expect(html).toContain('data-server-rendered="true"');
     expect(html).toContain("Published one");
     expect(html).toContain("Published body one");
+    expect(html).toContain("<p");
+    expect(html).not.toContain("<pre");
     expect(html).toContain('<title data-inertia="">Published one</title>');
   });
 

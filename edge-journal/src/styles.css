@@ -26,7 +26,10 @@
     --focus-blur-page: 6px;
     --focus-blur-entry: 2px;
     --focus-blur-dialog: 10px;
+    --focus-blur-dialog-content: 1px;
     --focus-blur-backdrop: 4px;
+    --focus-blur-status: 2px;
+    --focus-blur-control: 2px;
     color-scheme: light;
     scrollbar-color: #b8b8b8 #fafafa;
   }
@@ -35,7 +38,10 @@
     --focus-blur-page: 2px;
     --focus-blur-entry: 1px;
     --focus-blur-dialog: 4px;
+    --focus-blur-dialog-content: 0.5px;
     --focus-blur-backdrop: 1.5px;
+    --focus-blur-status: 1px;
+    --focus-blur-control: 1px;
   }
 
   body {
@@ -117,7 +123,10 @@
       --focus-blur-page: 0px;
       --focus-blur-entry: 0px;
       --focus-blur-dialog: 0px;
+      --focus-blur-dialog-content: 0px;
       --focus-blur-backdrop: 0px;
+      --focus-blur-status: 0px;
+      --focus-blur-control: 0px;
     }
 
     .search-dialog {
@@ -153,6 +162,89 @@
 }
 
 /* Astryx integration boundary: production atoms are intentionally unlayered. */
+.text-hover-link {
+  transition:
+    text-decoration-color 140ms var(--ease-out),
+    opacity 100ms var(--ease-out);
+}
+
+.text-hover-link[data-text-hovered="true"] {
+  opacity: 0.72;
+}
+
+.astryx-link.text-hover-link[data-text-hovered="true"] {
+  text-decoration-color: currentColor;
+}
+
+.nav-text-link,
+.story-link {
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+}
+
+.nav-text-link[aria-current="page"],
+.nav-text-link:focus-visible {
+  text-decoration-color: currentColor;
+}
+
+.story-link:focus-visible,
+.story-link[data-text-hovered="true"] {
+  text-decoration-color: currentColor;
+}
+
+.brand-link:active {
+  opacity: 0.55;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .story-link {
+    text-decoration-color: var(--color-touch-decoration);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .story-link {
+    text-decoration-color: currentColor;
+  }
+}
+
+.search-dialog {
+  filter: blur(0);
+}
+
+@starting-style {
+  .search-dialog[open]:not(.search-dialog--instant) {
+    filter: blur(var(--focus-blur-dialog-content));
+  }
+}
+
+.status-focus-pull {
+  filter: blur(0);
+  transition-property: opacity, transform, filter;
+}
+
+@starting-style {
+  .status-focus-pull {
+    filter: blur(var(--focus-blur-status));
+  }
+}
+
+.astryx-button.focus-swap > span:not([role]) > :not(.astryx-spinner) {
+  transition: filter 125ms var(--ease-out);
+}
+
+.astryx-button.focus-swap[aria-busy="true"]
+  > span[aria-hidden="true"]:not(:has(.astryx-spinner))
+  > :not(.astryx-spinner) {
+  filter: blur(var(--focus-blur-control));
+  transition-delay: calc(var(--duration-medium-min) - 125ms);
+}
+
+.search-dialog.search-dialog--instant {
+  animation-duration: 0ms;
+  transition-duration: 0ms;
+}
+
 .search-dialog.search-dialog--closing {
   animation-name: none;
   opacity: 0;
@@ -181,6 +273,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    --focus-blur-status: 0px;
+  }
+
+  .status-focus-pull {
+    transition-property: opacity;
+  }
+
   .search-dialog.search-dialog--closing {
     transform: none;
   }

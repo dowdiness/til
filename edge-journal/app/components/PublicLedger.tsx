@@ -4,11 +4,12 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { Pagination } from "@astryxdesign/core/Pagination";
 import { Text } from "@astryxdesign/core/Text";
 import { Link, router } from "@inertiajs/react";
-import { useRef, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { PublicPostSummary } from "../../domain/post";
 import { publishedDate } from "../../lib/published-date";
 import { serializePublicSearch } from "../../lib/search-params";
 import { astryxOverrides } from "../styles/astryx-overrides.stylex";
+import { textHoverHandlers } from "../styles/text-hover";
 
 const partialProps = ["posts", "query", "errors", "flash"];
 const entryDelayClasses = [
@@ -31,6 +32,7 @@ type Props = {
   posts: Posts;
   query: string;
   isSearching: boolean;
+  isOpeningPost: boolean;
   onClear: () => void;
   onOpenPost: (event: MouseEvent<Element>, href: string) => void;
 };
@@ -82,7 +84,20 @@ function PublicPagination({ page, pageCount, query }: PublicPaginationProps) {
   );
 }
 
-export function PublicLedger({ posts, query, isSearching, onClear, onOpenPost }: Props) {
+export function PublicLedger({
+  posts,
+  query,
+  isSearching,
+  isOpeningPost,
+  onClear,
+  onOpenPost,
+}: Props) {
+  const shouldAnimateEntries = useRef(true);
+
+  useEffect(() => {
+    shouldAnimateEntries.current = false;
+  }, []);
+
   return (
     <>
       <section className="mb-12 max-w-page max-narrow:mb-11">
@@ -111,11 +126,24 @@ export function PublicLedger({ posts, query, isSearching, onClear, onOpenPost }:
               type="button"
               label="Clear"
               variant="ghost"
+              className="focus-swap"
               isLoading={isSearching}
               isInterruptible
               xstyle={astryxOverrides.compactAction}
               onClick={onClear}
             />
+          ) : null}
+          {isOpeningPost ? (
+            <Text
+              type="supporting"
+              color="secondary"
+              as="p"
+              role="status"
+              aria-live="polite"
+              xstyle={astryxOverrides.resultCount}
+            >
+              Opening note…
+            </Text>
           ) : null}
         </div>
       </section>
@@ -124,17 +152,22 @@ export function PublicLedger({ posts, query, isSearching, onClear, onOpenPost }:
         <div className="flex flex-col">
           {posts.items.map((post, index) => (
             <article
-              className={`relative animate-ledger-entry py-2.5 motion-reduce:animate-ledger-fade motion-reduce:[animation-delay:0ms] max-mobile:py-3 ${entryDelayClasses[Math.min(index, 5)]}`}
+              className={`relative py-2.5 max-mobile:py-3 ${
+                shouldAnimateEntries.current
+                  ? `animate-ledger-entry motion-reduce:animate-ledger-fade motion-reduce:[animation-delay:0ms] ${entryDelayClasses[Math.min(index, 5)]}`
+                  : ""
+              }`}
               key={post.id}
             >
               <div className="flex min-w-0 items-baseline gap-entry max-narrow:grid max-narrow:grid-cols-ledger max-narrow:gap-x-4 max-narrow:border-b max-narrow:border-dotted max-narrow:border-rule max-narrow:pb-row-rule contrast-more:border-solid contrast-more:border-secondary">
-                <Heading level={2}>
+                <Heading level={2} xstyle={astryxOverrides.entryTitle}>
                   <Link
-                    className="relative text-inherit no-underline after:absolute after:inset-0 after:content-[''] hover:text-interactive hover:underline focus-visible:text-interactive focus-visible:underline focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-3 focus-visible:outline-[#171717] active:opacity-55 active:transition-opacity active:duration-75 coarse:underline coarse:decoration-touch-decoration coarse:decoration-1 coarse:underline-offset-[0.18em] contrast-more:decoration-current contrast-more:focus-visible:outline-2"
+                    className="story-link text-hover-link relative text-inherit no-underline after:absolute after:inset-0 after:content-[''] hover:text-interactive hover:underline focus-visible:text-interactive focus-visible:underline focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-3 focus-visible:outline-[#171717] active:opacity-55 active:transition-opacity active:duration-75 coarse:underline coarse:decoration-touch-decoration coarse:decoration-1 coarse:underline-offset-[0.18em] contrast-more:decoration-current contrast-more:focus-visible:outline-2"
                     href={`/posts/${post.slug}`}
                     prefetch="hover"
                     cacheFor="30s"
                     onClick={(event) => onOpenPost(event, `/posts/${post.slug}`)}
+                    {...textHoverHandlers}
                   >
                     {post.title}
                   </Link>

@@ -4,6 +4,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { usePage } from "@inertiajs/react";
 import type { ReactNode } from "react";
 import { astryxOverrides } from "../styles/astryx-overrides.stylex";
+import { textHoverHandlers } from "../styles/text-hover";
 
 export function Layout({
   children,
@@ -24,17 +25,34 @@ export function Layout({
     //   <= 500px: navigation/footer wrapping is allowed.
     <div className="journal-frame">
       <header className="mb-header-block flex items-baseline justify-between gap-8 max-narrow:mb-14">
-        <Link href="/" isStandalone hasUnderline={false} xstyle={astryxOverrides.brandLink}>
+        <Link
+          href="/"
+          isStandalone
+          hasUnderline={false}
+          className="brand-link text-hover-link"
+          xstyle={astryxOverrides.brandLink}
+          {...textHoverHandlers}
+        >
           Edge Journal
         </Link>
         {isAdmin ? (
           <nav aria-label="Main navigation" className="flex items-center gap-5 max-mobile:gap-4">
-            <Link href="/" isStandalone xstyle={astryxOverrides.navLink}>Journal</Link>
+            <Link
+              href="/"
+              isStandalone
+              className="nav-text-link text-hover-link"
+              xstyle={astryxOverrides.navLink}
+              {...textHoverHandlers}
+            >
+              Journal
+            </Link>
             <Link
               href="/admin"
               isStandalone
+              className="nav-text-link text-hover-link"
               xstyle={[astryxOverrides.navLink, astryxOverrides.currentNavLink]}
               aria-current="page"
+              {...textHoverHandlers}
             >
               Admin
             </Link>
@@ -42,7 +60,7 @@ export function Layout({
         ) : headerAction ? <div className="-me-action-edge flex items-center">{headerAction}</div> : null}
       </header>
       {flash ? (
-        <div data-flash-region className="-mt-9 mb-11 transition-focus duration-fast-max ease-out starting:-translate-y-1 starting:opacity-0 motion-reduce:translate-y-0 motion-reduce:transition-opacity motion-reduce:duration-fast-min">
+        <div data-flash-region className="status-focus-pull -mt-9 mb-11 transition-focus duration-status ease-out starting:-translate-y-1 starting:opacity-0 motion-reduce:translate-y-0 motion-reduce:transition-opacity motion-reduce:duration-fast-min">
           <Banner status="success" title={flash} container="card" />
         </div>
       ) : null}

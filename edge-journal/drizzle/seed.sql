@@ -12,7 +12,7 @@ Then make the next sentence earn its place.', 'published', 1709251200000, 170916
 
 It becomes architecture when the next layer starts to depend on it.
 
-Name the tradeoff while it is still small enough to reverse.', 'published', 1786720768568, 1786720768568, 1786720768568),
+Name the tradeoff while it is still small enough to reverse.', 'published', 1714521600000, 1714521600000, 1714521600000),
 ('Tomorrow Is a Draft', 'tomorrow-is-a-draft', 'A private working note for a later issue.', 'This is still being shaped.
 
 It is intentionally not published.', 'draft', NULL, 1711929600000, 1711929600000);

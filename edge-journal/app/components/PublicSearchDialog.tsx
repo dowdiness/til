@@ -19,17 +19,19 @@ type Props = {
 type SearchFormProps = {
   query: string;
   isSearching: boolean;
-  onClose: () => void;
-  onSubmit: (query: string | undefined) => void;
+  onClose: (instant: boolean) => void;
+  onSubmit: (query: string | undefined, instant: boolean) => void;
 };
 
 function SearchForm({ query, isSearching, onClose, onSubmit }: SearchFormProps) {
   const [searchQuery, setSearchQuery] = useState(query);
+  const submittedWithPointer = useRef(false);
 
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextQuery = searchQuery.trim();
-    onSubmit(nextQuery || undefined);
+    onSubmit(nextQuery || undefined, !submittedWithPointer.current);
+    submittedWithPointer.current = false;
   };
 
   return (
@@ -42,7 +44,7 @@ function SearchForm({ query, isSearching, onClose, onSubmit }: SearchFormProps) 
           icon={<Icon icon="close" size="sm" />}
           variant="ghost"
           xstyle={astryxOverrides.iconButton}
-          onClick={onClose}
+          onClick={(event) => onClose(event.detail === 0)}
         />
       </div>
       <Text type="supporting" color="secondary" as="p" xstyle={astryxOverrides.searchDialogHelp}>
@@ -65,9 +67,13 @@ function SearchForm({ query, isSearching, onClose, onSubmit }: SearchFormProps) 
           type="submit"
           label="Search"
           variant="primary"
+          className="focus-swap"
           isLoading={isSearching}
           isInterruptible
           xstyle={astryxOverrides.compactAction}
+          onPointerDown={() => {
+            submittedWithPointer.current = true;
+          }}
         />
       </div>
     </form>
@@ -76,6 +82,7 @@ function SearchForm({ query, isSearching, onClose, onSubmit }: SearchFormProps) 
 
 export function PublicSearchDialog({ query, isSearching, onSearch }: Props) {
   const [phase, setPhase] = useState<SearchPhase>("closed");
+  const [isInstant, setIsInstant] = useState(false);
   const searchTriggerRef = useRef<HTMLButtonElement | null>(null);
   const searchDialogRef = useRef<HTMLDialogElement | null>(null);
   const shouldRestoreFocus = useRef(false);
@@ -94,7 +101,7 @@ export function PublicSearchDialog({ query, isSearching, onSearch }: Props) {
     searchTriggerRef.current?.focus();
   }, [phase]);
 
-  const closeSearch = () => {
+  const closeSearch = (instant = false) => {
     if (
       !isOpen ||
       phase === "preparing" ||
@@ -102,7 +109,8 @@ export function PublicSearchDialog({ query, isSearching, onSearch }: Props) {
       !searchDialogRef.current?.open
     ) return;
     shouldRestoreFocus.current = true;
-    setPhase("preparing");
+    setIsInstant(instant);
+    setPhase(instant ? "closed" : "preparing");
   };
 
   return (
@@ -121,13 +129,16 @@ export function PublicSearchDialog({ query, isSearching, onSearch }: Props) {
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         data-has-query={Boolean(query)}
-        onClick={() => setPhase("open")}
+        onClick={(event) => {
+          setIsInstant(event.detail === 0);
+          setPhase("open");
+        }}
       />
       <Dialog
         id="note-search-dialog"
         aria-label="Search notes"
         ref={searchDialogRef}
-        className={`search-dialog${isClosing ? " search-dialog--closing" : ""}`}
+        className={`search-dialog${isClosing ? " search-dialog--closing" : ""}${isInstant ? " search-dialog--instant" : ""}`}
         xstyle={[
           astryxOverrides.searchDialog,
           isOpen ? astryxOverrides.searchDialogOpen : null,
@@ -136,6 +147,11 @@ export function PublicSearchDialog({ query, isSearching, onSearch }: Props) {
         isOpen={isOpen}
         onOpenChange={(nextIsOpen) => {
           if (!nextIsOpen) closeSearch();
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== "Escape") return;
+          event.preventDefault();
+          closeSearch(true);
         }}
         onTransitionEnd={(event) => {
           if (
@@ -159,7 +175,7 @@ export function PublicSearchDialog({ query, isSearching, onSearch }: Props) {
           query={query}
           isSearching={isSearching}
           onClose={closeSearch}
-          onSubmit={(nextQuery) => onSearch(nextQuery, closeSearch)}
+          onSubmit={(nextQuery, instant) => onSearch(nextQuery, () => closeSearch(instant))}
         />
       </Dialog>
     </>

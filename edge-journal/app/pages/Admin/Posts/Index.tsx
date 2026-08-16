@@ -44,7 +44,7 @@ export default function Index({ posts, undo, flash }: Props) {
       </div>
 
       {undo ? (
-        <div className="-mt-5 mb-10 flex items-center justify-between gap-4 border-y border-dotted border-rule-strong py-3 transition-focus duration-fast-max ease-out starting:-translate-y-1 starting:opacity-0 motion-reduce:translate-y-0 motion-reduce:transition-opacity motion-reduce:duration-fast-min contrast-more:border-solid contrast-more:border-secondary" role="status" aria-live="polite">
+        <div className="status-focus-pull -mt-5 mb-10 flex items-center justify-between gap-4 border-y border-dotted border-rule-strong py-3 transition-focus duration-status ease-out starting:-translate-y-1 starting:opacity-0 motion-reduce:translate-y-0 motion-reduce:transition-opacity motion-reduce:duration-fast-min contrast-more:border-solid contrast-more:border-secondary" role="status" aria-live="polite">
           <Text as="p" xstyle={astryxOverrides.resultCount}>“{undo.title}” was deleted.</Text>
           <Button
             label="Undo delete"

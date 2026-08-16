@@ -186,6 +186,7 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
             label={action === "create" ? "Create post" : "Save changes"}
             variant="primary"
             size="lg"
+            className="focus-swap"
             isDisabled={form.processing}
             isLoading={form.processing}
           />

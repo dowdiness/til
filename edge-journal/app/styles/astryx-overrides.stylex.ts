@@ -15,9 +15,9 @@ export const astryxOverrides = stylex.create({
       default: 1,
       ":active": 0.55,
     },
-    transitionDuration: "80ms",
-    transitionProperty: "opacity",
-    transitionTimingFunction: "ease-out",
+    transitionDuration: "100ms",
+    transitionProperty: "color, opacity",
+    transitionTimingFunction: "var(--ease-out)",
   },
   currentNavLink: {
     color: "var(--color-text-primary)",
@@ -37,9 +37,19 @@ export const astryxOverrides = stylex.create({
       default: 1,
       ":active": 0.55,
     },
-    transitionDuration: "80ms",
+    transitionDuration: "100ms",
     transitionProperty: "opacity",
-    transitionTimingFunction: "ease-out",
+    transitionTimingFunction: "var(--ease-out)",
+  },
+  textLink: {
+    textDecorationColor: {
+      default: "var(--color-text-secondary)",
+      ":hover": "currentColor",
+      ":focus-visible": "currentColor",
+    },
+    transitionDuration: "100ms",
+    transitionProperty: "color, text-decoration-color, opacity",
+    transitionTimingFunction: "var(--ease-out)",
   },
   iconButton: {
     minWidth: "2rem",
@@ -66,7 +76,7 @@ export const astryxOverrides = stylex.create({
     boxShadow: "none",
     color: "var(--color-text-primary)",
     transitionDuration: "var(--duration-medium-min)",
-    transitionProperty: "opacity, transform",
+    transitionProperty: "opacity, transform, filter",
     transitionTimingFunction: "var(--ease-out)",
   },
   searchDialogHeading: {

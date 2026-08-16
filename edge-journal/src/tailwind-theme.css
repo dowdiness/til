@@ -38,6 +38,7 @@
   --transition-property-focus: opacity, transform;
   --transition-duration-fast-min: var(--duration-fast-min);
   --transition-duration-fast-max: var(--duration-fast-max);
+  --transition-duration-status: 165ms;
 
   --text-label: 0.8125rem;
   --text-label--line-height: 1.5;

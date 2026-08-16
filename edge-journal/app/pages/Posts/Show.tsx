@@ -4,7 +4,9 @@ import { Text } from "@astryxdesign/core/Text";
 import { Head } from "@inertiajs/react";
 import { Layout } from "../../components/Layout";
 import { astryxOverrides } from "../../styles/astryx-overrides.stylex";
+import { textHoverHandlers } from "../../styles/text-hover";
 import type { PageProps } from "../../pages.gen";
+import { articleBodyParagraphs } from "../../../lib/article-body";
 import { publishedDate } from "../../../lib/published-date";
 
 type Props = PageProps<"Posts/Show">;
@@ -31,9 +33,27 @@ export default function Show({ post, flash }: Props) {
           <Text type="large" color="secondary" as="p" xstyle={astryxOverrides.articleLead}>{post.excerpt}</Text>
         </header>
         <div className="mb-11 h-px w-12 bg-divider" aria-hidden="true" />
-        <pre className="m-0 max-w-prose whitespace-pre-wrap text-pretty wrap-anywhere font-sans text-article text-primary">{post.body}</pre>
+        <div className="max-w-prose text-primary">
+          {articleBodyParagraphs(post.body).map((paragraph, index) => (
+            <p
+              className={`${index === 0 ? "mt-0" : "mt-[1.8em]"} mb-0 whitespace-pre-wrap text-pretty wrap-anywhere text-article`}
+              key={index}
+            >
+              {paragraph}
+            </p>
+          ))}
+        </div>
         <footer className="mt-16 border-t border-dotted border-rule pt-4 text-sm contrast-more:border-solid contrast-more:border-secondary">
-          <Link href="/" isStandalone hasUnderline>Back to the journal</Link>
+          <Link
+            href="/"
+            isStandalone
+            hasUnderline
+            className="text-hover-link"
+            xstyle={astryxOverrides.textLink}
+            {...textHoverHandlers}
+          >
+            Back to the journal
+          </Link>
         </footer>
       </article>
     </Layout>
