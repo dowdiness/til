@@ -2,16 +2,17 @@ import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
 import { Text } from "@astryxdesign/core/Text";
-import { Head, router, useForm } from "@inertiajs/react";
-import { useRef, useState } from "react";
-import { AdminPostFilters } from "../../../components/AdminPostFilters";
+import { Head, useForm } from "@inertiajs/react";
+import { useState } from "react";
+import {
+  AdminClearFiltersButton,
+  AdminPostFilters,
+} from "../../../components/AdminPostFilters";
 import { Layout } from "../../../components/Layout";
 import type { PageProps } from "../../../pages.gen";
-import { serializeAdminSearch } from "../../../../lib/search-params";
 
 type Props = PageProps<"Admin/Posts/Index">;
 
-const partialProps = ["posts", "query", "status", "undo", "errors", "flash"];
 const updatedDateFormatter = new Intl.DateTimeFormat("en", {
   year: "numeric",
   month: "short",
@@ -22,31 +23,10 @@ function updatedDate(value: string) {
   return updatedDateFormatter.format(new Date(value));
 }
 
-export default function Index({ posts, query, status, undo, flash }: Props) {
+export default function Index({ posts, undo, flash }: Props) {
   const destroy = useForm({});
   const restore = useForm({});
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [isFiltering, setIsFiltering] = useState(false);
-  const visitCounter = useRef(0);
-
-  const applyFilters = (filters: { q?: string; status?: "draft" | "published" }) => {
-    const visitId = ++visitCounter.current;
-    setIsFiltering(true);
-    const href = serializeAdminSearch("/admin/posts", {
-      q: filters.q ?? null,
-      status: filters.status ?? null,
-    });
-
-    router.get(href, {}, {
-      only: partialProps,
-      preserveState: true,
-      preserveScroll: true,
-      replace: true,
-      onFinish: () => {
-        if (visitCounter.current === visitId) setIsFiltering(false);
-      },
-    });
-  };
 
   return (
     <Layout flash={flash}>
@@ -75,13 +55,7 @@ export default function Index({ posts, query, status, undo, flash }: Props) {
         </div>
       ) : null}
 
-      <AdminPostFilters
-        key={JSON.stringify([query, status])}
-        query={query}
-        status={status}
-        isFiltering={isFiltering}
-        onApply={applyFilters}
-      />
+      <AdminPostFilters />
 
       <section className="admin-section" aria-label="Posts">
         <Text type="supporting" color="secondary" as="h2">Entries</Text>
@@ -131,14 +105,7 @@ export default function Index({ posts, query, status, undo, flash }: Props) {
           title="No posts match these filters"
           description="Try another phrase or include both publication states."
           headingLevel={2}
-          actions={(
-            <Button
-              label="Clear filters"
-              variant="secondary"
-              isLoading={isFiltering}
-              onClick={() => applyFilters({})}
-            />
-          )}
+          actions={<AdminClearFiltersButton />}
         />
       ) : null}
     </Layout>

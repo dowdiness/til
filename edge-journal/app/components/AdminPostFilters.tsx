@@ -1,7 +1,10 @@
 import { Button } from "@astryxdesign/core/Button";
 import { Selector } from "@astryxdesign/core/Selector";
 import { TextInput } from "@astryxdesign/core/TextInput";
-import { useState, type FormEvent } from "react";
+import { debounce, defaultRateLimit, useQueryStates } from "nuqs";
+import { useTransition, type FormEvent } from "react";
+import { adminSearchParams } from "../../lib/search-params";
+import { NuqsInertiaAdapter } from "../nuqs-inertia-adapter";
 
 const statusOptions = [
   { value: "all", label: "All statuses" },
@@ -9,70 +12,74 @@ const statusOptions = [
   { value: "published", label: "Published" },
 ];
 
-type Status = "all" | "draft" | "published";
+const partialProps = ["posts", "query", "status", "undo", "errors", "flash"];
+const searchDebounce = debounce(300);
 
-type AppliedFilters = {
-  q?: string;
-  status?: Exclude<Status, "all">;
-};
+function AdminPostFilterFields() {
+  const [isFiltering, startTransition] = useTransition();
+  const [{ q: filterQuery, status: filterStatus }, setFilters] = useQueryStates(
+    adminSearchParams,
+    {
+      history: "replace",
+      shallow: false,
+      startTransition,
+    },
+  );
 
-type Props = {
-  query: string;
-  status: string;
-  isFiltering: boolean;
-  onApply: (filters: AppliedFilters) => void;
-};
-
-export function AdminPostFilters({ query, status, isFiltering, onApply }: Props) {
-  const initialStatus: Status = status === "draft" || status === "published" ? status : "all";
-  const [filterQuery, setFilterQuery] = useState(query);
-  const [filterStatus, setFilterStatus] = useState<Status>(initialStatus);
-
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const nextQuery = filterQuery.trim();
-    onApply({
-      ...(nextQuery ? { q: nextQuery } : {}),
-      ...(filterStatus !== "all" ? { status: filterStatus } : {}),
-    });
+    await setFilters(
+      { q: filterQuery || null, status: filterStatus },
+      { limitUrlUpdates: defaultRateLimit },
+    );
   };
 
-  const clearFilters = () => {
-    setFilterQuery("");
-    setFilterStatus("all");
-    onApply({});
+  const clearFilters = async () => {
+    await setFilters(
+      { q: null, status: null },
+      { limitUrlUpdates: defaultRateLimit },
+    );
   };
 
   return (
-    <form className="admin-filters" role="search" onSubmit={submit}>
+    <form className="admin-filters" role="search" aria-busy={isFiltering} onSubmit={submit}>
       <TextInput
         label="Search posts"
         value={filterQuery}
-        onChange={setFilterQuery}
+        changeAction={async (nextQuery) => {
+          await setFilters(
+            { q: nextQuery || null },
+            {
+              limitUrlUpdates: nextQuery.length > 0 ? searchDebounce : defaultRateLimit,
+            },
+          );
+        }}
         placeholder="Title, slug, or excerpt"
         hasClear
+        isLoading={isFiltering}
         width="100%"
       />
       <Selector
         label="Status"
         options={statusOptions}
         value={filterStatus}
-        onChange={(value) => {
-          if (value === "all" || value === "draft" || value === "published") {
-            setFilterStatus(value);
+        changeAction={async (value) => {
+          if (value !== "all" && value !== "draft" && value !== "published") {
+            return;
           }
+          await setFilters(
+            {
+              q: filterQuery || null,
+              status: value === "all" ? null : value,
+            },
+            { limitUrlUpdates: defaultRateLimit },
+          );
         }}
+        isLoading={isFiltering}
         width="100%"
       />
       <div className="filter-actions">
-        <Button
-          type="submit"
-          label="Apply"
-          variant="ghost"
-          isLoading={isFiltering}
-          isInterruptible
-        />
-        {query || status !== "all" ? (
+        {filterQuery || filterStatus !== "all" ? (
           <Button
             type="button"
             label="Clear"
@@ -84,5 +91,44 @@ export function AdminPostFilters({ query, status, isFiltering, onApply }: Props)
         ) : null}
       </div>
     </form>
+  );
+}
+
+export function AdminPostFilters() {
+  return (
+    <NuqsInertiaAdapter only={partialProps}>
+      <AdminPostFilterFields />
+    </NuqsInertiaAdapter>
+  );
+}
+
+function ClearFiltersButton() {
+  const [isFiltering, startTransition] = useTransition();
+  const [, setFilters] = useQueryStates(adminSearchParams, {
+    history: "replace",
+    shallow: false,
+    startTransition,
+  });
+
+  return (
+    <Button
+      label="Clear filters"
+      variant="secondary"
+      isLoading={isFiltering}
+      onClick={async () => {
+        await setFilters(
+          { q: null, status: null },
+          { limitUrlUpdates: defaultRateLimit },
+        );
+      }}
+    />
+  );
+}
+
+export function AdminClearFiltersButton() {
+  return (
+    <NuqsInertiaAdapter only={partialProps}>
+      <ClearFiltersButton />
+    </NuqsInertiaAdapter>
   );
 }
