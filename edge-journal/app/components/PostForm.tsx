@@ -44,11 +44,9 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
     status: initial.status,
   });
   const [touched, setTouched] = useState<Partial<Record<PostField, true>>>({});
-  const [clearedServerErrors, setClearedServerErrors] = useState<Partial<Record<PostField, true>>>({});
+  const [dismissedServerErrors, setDismissedServerErrors] = useState<Partial<Record<PostField, string>>>({});
   const validation = validatePostInput(form.data);
   const clientErrors = validation.ok ? {} : validation.errors;
-
-  useEffect(() => setClearedServerErrors({}), [errors]);
 
   useEffect(() => {
     const removeBeforeListener = router.on("before", (event) => {
@@ -79,10 +77,10 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
       case "body": form.setData("body", value); break;
       case "status": if (isPostStatus(value)) form.setData("status", value); break;
     }
-    if (errors[field]) setClearedServerErrors((current) => ({ ...current, [field]: true }));
+    if (errors[field]) setDismissedServerErrors((current) => ({ ...current, [field]: errors[field] }));
   };
   const fieldError = (field: PostField): string | undefined => {
-    if (!clearedServerErrors[field] && errors[field]) return errors[field];
+    if (errors[field] && dismissedServerErrors[field] !== errors[field]) return errors[field];
     return touched[field] ? clientErrors[field] : undefined;
   };
 
@@ -90,6 +88,7 @@ export function PostForm({ action, initial, errors = {} }: PostFormProps) {
     event.preventDefault();
     setTouched(allFieldsTouched);
     if (!validation.ok) return;
+    setDismissedServerErrors({});
     if (action === "create") form.post("/admin/posts");
     else form.patch(`/admin/posts/${initial.id ?? 0}`);
   };

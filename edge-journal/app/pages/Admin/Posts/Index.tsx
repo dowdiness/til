@@ -1,75 +1,51 @@
 import { Button } from "@astryxdesign/core/Button";
 import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Heading } from "@astryxdesign/core/Heading";
-import { Selector } from "@astryxdesign/core/Selector";
 import { Text } from "@astryxdesign/core/Text";
-import { TextInput } from "@astryxdesign/core/TextInput";
 import { Head, router, useForm } from "@inertiajs/react";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useRef, useState } from "react";
+import { AdminPostFilters } from "../../../components/AdminPostFilters";
 import { Layout } from "../../../components/Layout";
 import type { PageProps } from "../../../pages.gen";
-import { isPostStatus } from "../../../../domain/post-validation";
+import { serializeAdminSearch } from "../../../../lib/search-params";
 
 type Props = PageProps<"Admin/Posts/Index">;
 
 const partialProps = ["posts", "query", "status", "undo", "errors", "flash"];
-const statusOptions = [
-  { value: "all", label: "All statuses" },
-  { value: "draft", label: "Draft" },
-  { value: "published", label: "Published" },
-];
+const updatedDateFormatter = new Intl.DateTimeFormat("en", {
+  year: "numeric",
+  month: "short",
+  day: "2-digit",
+});
 
 function updatedDate(value: string) {
-  return new Intl.DateTimeFormat("en", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  }).format(new Date(value));
+  return updatedDateFormatter.format(new Date(value));
 }
 
 export default function Index({ posts, query, status, undo, flash }: Props) {
   const destroy = useForm({});
   const restore = useForm({});
-  const [filterQuery, setFilterQuery] = useState(query);
-  const [filterStatus, setFilterStatus] = useState(status);
-  const [isFiltering, setIsFiltering] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [isFiltering, setIsFiltering] = useState(false);
   const visitCounter = useRef(0);
-  useEffect(() => {
-    setFilterQuery(query);
-    setFilterStatus(status);
-  }, [query, status]);
 
-  const visit = (data: { q?: string; status?: "draft" | "published" }) => {
+  const applyFilters = (filters: { q?: string; status?: "draft" | "published" }) => {
     const visitId = ++visitCounter.current;
     setIsFiltering(true);
-    router.get(
-      "/admin/posts",
-      data,
-      {
-        only: partialProps,
-        preserveState: true,
-        preserveScroll: true,
-        replace: true,
-        onFinish: () => {
-          if (visitCounter.current === visitId) setIsFiltering(false);
-        },
-      },
-    );
-  };
-
-  const submit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const nextQuery = filterQuery.trim();
-    visit({
-      ...(nextQuery ? { q: nextQuery } : {}),
-      ...(isPostStatus(filterStatus) ? { status: filterStatus } : {}),
+    const href = serializeAdminSearch("/admin/posts", {
+      q: filters.q ?? null,
+      status: filters.status ?? null,
     });
-  };
-  const clearFilters = () => {
-    setFilterQuery("");
-    setFilterStatus("all");
-    visit({});
+
+    router.get(href, {}, {
+      only: partialProps,
+      preserveState: true,
+      preserveScroll: true,
+      replace: true,
+      onFinish: () => {
+        if (visitCounter.current === visitId) setIsFiltering(false);
+      },
+    });
   };
 
   return (
@@ -92,49 +68,20 @@ export default function Index({ posts, query, status, undo, flash }: Props) {
             label="Undo delete"
             variant="secondary"
             isLoading={restore.processing}
-            onClick={() => restore.post(`/admin/posts/${undo.id}/restore`, { preserveScroll: true })}
+            onClick={() => restore.post(`/admin/posts/${undo.id}/restore`, {
+              preserveScroll: true,
+            })}
           />
         </div>
       ) : null}
 
-      <form className="admin-filters" role="search" onSubmit={submit}>
-        <TextInput
-          label="Search posts"
-          value={filterQuery}
-          onChange={setFilterQuery}
-          placeholder="Title, slug, or excerpt"
-          hasClear
-          width="100%"
-        />
-        <Selector
-          label="Status"
-          options={statusOptions}
-          value={filterStatus}
-          onChange={(value) => {
-            if (value === "all" || value === "draft" || value === "published") setFilterStatus(value);
-          }}
-          width="100%"
-        />
-        <div className="filter-actions">
-          <Button
-            type="submit"
-            label="Apply"
-            variant="ghost"
-            isLoading={isFiltering}
-            isInterruptible
-          />
-          {(query || status !== "all") ? (
-            <Button
-              type="button"
-              label="Clear"
-              variant="ghost"
-              isLoading={isFiltering}
-              isInterruptible
-              onClick={clearFilters}
-            />
-          ) : null}
-        </div>
-      </form>
+      <AdminPostFilters
+        key={JSON.stringify([query, status])}
+        query={query}
+        status={status}
+        isFiltering={isFiltering}
+        onApply={applyFilters}
+      />
 
       <section className="admin-section" aria-label="Posts">
         <Text type="supporting" color="secondary" as="h2">Entries</Text>
@@ -144,7 +91,9 @@ export default function Index({ posts, query, status, undo, flash }: Props) {
               <div className="entry-title-row">
                 <Heading level={3}>{post.title}</Heading>
                 <span className="entry-leader" aria-hidden="true" />
-                <span className={`post-status post-status--${post.status}`}>{post.status}</span>
+                <span className={`post-status post-status--${post.status}`}>
+                  {post.status}
+                </span>
               </div>
               <div className="admin-entry-detail">
                 <Text type="code" color="secondary">/{post.slug}</Text>
@@ -152,7 +101,9 @@ export default function Index({ posts, query, status, undo, flash }: Props) {
                   Updated {updatedDate(post.updatedAt)}
                 </Text>
               </div>
-              <Text as="p" color="secondary" className="entry-excerpt">{post.excerpt}</Text>
+              <Text as="p" color="secondary" className="entry-excerpt">
+                {post.excerpt}
+              </Text>
               <div className="card-actions">
                 <Button label="Edit" href={`/admin/posts/${post.id}/edit`} variant="ghost" />
                 <Button
@@ -180,7 +131,14 @@ export default function Index({ posts, query, status, undo, flash }: Props) {
           title="No posts match these filters"
           description="Try another phrase or include both publication states."
           headingLevel={2}
-          actions={<Button label="Clear filters" variant="secondary" onClick={clearFilters} />}
+          actions={(
+            <Button
+              label="Clear filters"
+              variant="secondary"
+              isLoading={isFiltering}
+              onClick={() => applyFilters({})}
+            />
+          )}
         />
       ) : null}
     </Layout>

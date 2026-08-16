@@ -9,7 +9,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { inertia } from "@hono/inertia";
 import "./pages.gen";
 import { listAdmin, listPublished, findPost, findPublishedBySlug, createPost, updatePost, deletePost, findDeletedPost, restorePost } from "../db/posts";
-import { isPostStatus, validatePostInput, type FieldErrors } from "../domain/post-validation";
+import { validatePostInput, type FieldErrors } from "../domain/post-validation";
 import type { PostInput } from "../domain/post";
 import { rootView } from "./root-view";
 import { APP_VERSION } from "../lib/app-version";
@@ -17,6 +17,7 @@ import { renderPage } from "../lib/inertia-render";
 import { noticeRedirect } from "../lib/redirect";
 import { sameOriginMutation } from "../lib/request";
 import { NotFoundError } from "../lib/errors";
+import { loadAdminSearchParams, loadPublicSearchParams } from "../lib/search-params";
 
 const app = new Hono<{ Bindings: CloudflareBindings; Variables: { requestId: string } }>();
 
@@ -55,10 +56,10 @@ async function validatedInput(c: Parameters<typeof readInput>[0]): Promise<{ val
 }
 
 const routes = app.get("/", async (c) => {
-  const pageValue = numberParam(c.req.query("page") ?? "1") ?? 1;
-  const query = c.req.query("q") ?? "";
-  const posts = await listPublished(c.env.DB, pageValue, query);
-  return renderPage(c, secret(c), "Posts/Index", { posts, query });
+  const search = loadPublicSearchParams(c.req.raw);
+  const pageValue = search.page > 0 ? search.page : 1;
+  const posts = await listPublished(c.env.DB, pageValue, search.q);
+  return renderPage(c, secret(c), "Posts/Index", { posts, query: search.q });
 })
 .get("/posts/:slug", async (c) => {
   const post = await findPublishedBySlug(c.env.DB, c.req.param("slug"));
@@ -68,15 +69,18 @@ const routes = app.get("/", async (c) => {
 
 .get("/admin", (c) => c.redirect("/admin/posts", 303))
 .get("/admin/posts", async (c) => {
-  const query = c.req.query("q") ?? "";
-  const requestedStatus = c.req.query("status") ?? "all";
-  const status = isPostStatus(requestedStatus) ? requestedStatus : "all";
+  const search = loadAdminSearchParams(c.req.raw);
   const undoId = numberParam(c.req.query("undo") ?? "");
   const [posts, undo] = await Promise.all([
-    listAdmin(c.env.DB, query, status === "all" ? undefined : status),
+    listAdmin(c.env.DB, search.q, search.status === "all" ? undefined : search.status),
     undoId === null ? Promise.resolve(null) : findDeletedPost(c.env.DB, undoId),
   ]);
-  return renderPage(c, secret(c), "Admin/Posts/Index", { posts, query, status, undo });
+  return renderPage(c, secret(c), "Admin/Posts/Index", {
+    posts,
+    query: search.q,
+    status: search.status,
+    undo,
+  });
 })
 .get("/admin/posts/new", async (c) => renderPage(c, secret(c), "Admin/Posts/New", { initial: initialPost() }))
 .get("/admin/posts/:id/edit", async (c) => {

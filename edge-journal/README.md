@@ -9,6 +9,7 @@ Public pages (`Posts/Index` and `Posts/Show`) are server-rendered on initial doc
 All direct dependencies are pinned in `package.json` and `pnpm-lock.yaml`:
 
 - `@hono/inertia` 0.7.0, `@inertiajs/core` 3.6.1, and `@inertiajs/react` 3.6.1 — the Inertia protocol, typed `c.render()`, selective SSR/hydration, links, document head, and forms
+- nuqs 2.9.5 — shared, typed parsing and serialization for public and admin search parameters
 - Hono 4.13.2 — Workers-native routing, middleware, cookies, Basic Auth, and HTTP responses
 - React / React DOM 19.2.8 — selective public-page SSR, hydration, browser page components, and the document shell
 - Astryx Core 0.4.1, Astryx Neutral 0.4.1, and StyleX 0.19.0 — accessible UI components, theme tokens, and the visual system; production compiles Astryx source via `@astryxdesign/build/vite` with StyleX tree-shaking
@@ -130,12 +131,12 @@ Production migration and Worker deployment are intentionally separate operationa
 - `domain` — Valibot validation and the pure publication timestamp transition
 - `db` — request-scoped `drizzle(c.env.DB)` construction, explicit DTO mapping, and purpose-specific queries/commands
 - `drizzle/migrations` and `drizzle/seed.sql` — generated schema history and idempotent fixtures
-- `lib` — one-time signed notices, rendering, redirects, and same-origin checks
+- `lib` — one-time signed notices, typed nuqs search-parameter definitions, rendering, redirects, and same-origin checks
 - `tests` — Workers-runtime integration tests using real D1 bindings
 
 ## Inertia conveniences
 
-Public search, pagination, and admin filtering use partial reloads with URL synchronization, preserved component state, and preserved scroll position. Public search opens from the journal header in an accessible Astryx dialog; active queries remain visible beside the server-owned result count. Search and filter controls expose interruptible loading feedback during visits. Public article links prefetch their page object on hover for faster detail navigation, while authenticated admin navigation marks the current section with `aria-current`.
+Public search, pagination, and admin filtering use partial reloads with URL synchronization, preserved component state, and preserved scroll position. Shared definitions in `lib/search-params.ts` use `nuqs/server`: `createLoader` parses Hono requests and `createSerializer` builds public `q`/`page` and admin `q`/`status` URLs while omitting default values. Inertia remains the sole navigation owner; no `NuqsAdapter` or unstable custom adapter is used because nuqs does not provide an Inertia adapter. Public search opens from the journal header in an accessible Astryx dialog; active queries remain visible beside the server-owned result count. Search and filter controls expose interruptible loading feedback during visits. Public article links prefetch their page object on hover for faster detail navigation, while authenticated admin navigation marks the current section with `aria-current`.
 
 New and edit forms give `useForm` a route-specific remember key, so long drafts survive Inertia navigation and browser history restoration. Dirty forms warn before an Inertia GET navigation or full page unload; prefetch and the form's own mutation requests are never blocked by that guard. Delete is implemented as a reversible soft delete: the redirect exposes an authenticated Undo action, while all public, admin, and edit queries exclude deleted rows.
 
