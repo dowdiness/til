@@ -4,7 +4,7 @@ import { Heading } from "@astryxdesign/core/Heading";
 import { Pagination } from "@astryxdesign/core/Pagination";
 import { Text } from "@astryxdesign/core/Text";
 import { Link, router } from "@inertiajs/react";
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useRef, useState, type MouseEvent } from "react";
 import type { PublicPostSummary } from "../../domain/post";
 import { publishedDate } from "../../lib/published-date";
 import { serializePublicSearch } from "../../lib/search-params";
@@ -92,12 +92,6 @@ export function PublicLedger({
   onClear,
   onOpenPost,
 }: Props) {
-  const shouldAnimateEntries = useRef(true);
-
-  useEffect(() => {
-    shouldAnimateEntries.current = false;
-  }, []);
-
   return (
     <>
       <section className="mb-12 max-w-page max-narrow:mb-11">
@@ -152,11 +146,7 @@ export function PublicLedger({
         <div className="flex flex-col">
           {posts.items.map((post, index) => (
             <article
-              className={`relative py-2.5 max-mobile:py-3 ${
-                shouldAnimateEntries.current
-                  ? `animate-ledger-entry motion-reduce:animate-ledger-fade motion-reduce:[animation-delay:0ms] ${entryDelayClasses[Math.min(index, 5)]}`
-                  : ""
-              }`}
+              className={`relative py-2.5 max-mobile:py-3 animate-ledger-entry motion-reduce:animate-ledger-fade motion-reduce:[animation-delay:0ms] ${entryDelayClasses[Math.min(index, 5)]}`}
               key={post.id}
             >
               <div className="flex min-w-0 items-baseline gap-entry max-narrow:grid max-narrow:grid-cols-ledger max-narrow:gap-x-4 max-narrow:border-b max-narrow:border-dotted max-narrow:border-rule max-narrow:pb-row-rule contrast-more:border-solid contrast-more:border-secondary">

@@ -1,7 +1,8 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
 import tailwindcss from "@tailwindcss/vite";
 import { astryxStylex, LIGHTNINGCSS_TARGETS } from "@astryxdesign/build/vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
 import { defineConfig } from "vite";
 import { inertiaPages } from "@hono/inertia/vite";
 import ssrPlugin from "vite-ssr-components/plugin";
@@ -27,6 +28,7 @@ export default defineConfig(({ command }) => ({
     cloudflare(),
     ssrPlugin(),
     react(),
+    babel({ presets: [reactCompilerPreset()] }),
   ],
   build: { target: "es2022" },
 }));
